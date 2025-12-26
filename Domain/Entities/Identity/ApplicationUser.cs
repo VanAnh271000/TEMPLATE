@@ -6,5 +6,6 @@ namespace Domain.Entities.Identity
     {
         public string FullName { get; set; } = string.Empty;
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
+        public bool IsActive { get; set; } = true;
     }
 }
