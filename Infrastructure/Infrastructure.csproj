@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="BackgroundJobs\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
   <ItemGroup>
