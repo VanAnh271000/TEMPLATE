@@ -1,4 +1,5 @@
-﻿using Infrastructure.Context;
+﻿using Application.Interfaces.Commons;
+using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Infrastructure.Factories

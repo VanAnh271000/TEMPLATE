@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Factories
+﻿namespace Application.Interfaces.Commons
 {
     public interface IUnitOfWork
     {
