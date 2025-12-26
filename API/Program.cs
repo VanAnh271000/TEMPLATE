@@ -1,3 +1,4 @@
+using API.Installers;
 using Infrastructure;
 namespace API {     
     public class Program
@@ -6,8 +7,9 @@ namespace API {
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.InstallServicesInAssembly(builder.Configuration);
 
+            builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
 
