@@ -12,7 +12,7 @@ namespace API.Installers
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
             //For Entity Framework Core
-            string? connectionString = configuration.GetConnectionString("ConnectionString");
+            string? connectionString = configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString)
             );
