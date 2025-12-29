@@ -1,0 +1,58 @@
+﻿using Application.DTOs.Identity;
+using Application.Interfaces.Services.Identity;
+using Microsoft.Extensions.Configuration;
+using MailKit.Net.Smtp;
+using MimeKit;
+
+namespace Application.Services.Identity
+{
+    public class EmailService : IEmailService
+    {
+        private readonly EmailConfiguration _emailConfig;
+        private readonly IConfiguration _configuration;
+        public EmailService(EmailConfiguration emailConfig,
+            IConfiguration configuration)
+        {
+            _emailConfig = emailConfig;
+            _configuration = configuration;
+        }
+
+        private MimeMessage CreateEmailMessage(EmailMessage message)
+        {
+            var emailMessage = new MimeMessage();
+            emailMessage.From.Add(new MailboxAddress(_emailConfig.ApplicationName, _emailConfig.From));
+            emailMessage.To.AddRange(message.To);
+            emailMessage.Subject = message.Subject;
+            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = $"{message.Content}<br>{_emailConfig.ApplicationName}" };
+            return emailMessage;
+        }
+
+        public void SendEmail(EmailMessage message)
+        {
+            var emailMessage = CreateEmailMessage(message);
+            Send(emailMessage);
+        }
+
+        private void Send(MimeMessage mailMessage)
+        {
+            using var client = new SmtpClient();
+            try
+            {
+                client.Connect(_emailConfig.SmtpServer, _emailConfig.Port, true);
+                client.AuthenticationMechanisms.Remove("XOAUTH2");
+                client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
+
+                client.Send(mailMessage);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                client.Disconnect(true);
+                client.Dispose();
+            }
+        }
+    }
+}
