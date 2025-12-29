@@ -16,5 +16,19 @@
         public const string ErrorDeletingEntity = "Error deleting entity";
         public const string ErrorRetrivingPagedResult = "Error retrieving paged result";
 
+        //Authentication
+        public const string InvalidToken = "Invalid token";
+        public const string InvalidRefreshToken = "Invalid refresh token";
+        public const string EmailExists = "Email already exists";
+        public const string InvalidOTPCode = "Invalid OTP code";
+        public const string InvalidCredentials = "Invalid username or password";
+        public const string TwoFactorNotEnabled = "Two-factor authentication is not enabled for this user";
+        // User
+        public const string UserNotFound = "User not found";
+        public const string UserAlreadyExists = "User already exists";
+        public const string UserNameExits = "Username already exists";
+        public const string GetAccountFailed = "Get account failed";
+        public const string CreateAccountFailed = "Create account failed";
+        public const string UpdateAccountFailed = "Update account failed";
     }
 }
