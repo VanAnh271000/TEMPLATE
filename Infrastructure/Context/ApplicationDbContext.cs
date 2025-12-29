@@ -14,5 +14,7 @@ namespace Infrastructure.Context
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
+        
+        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }
