@@ -13,6 +13,8 @@ namespace Infrastructure.Context
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+            SeedData.SeedPermission(modelBuilder);
         }
         
         public virtual DbSet<RefreshToken> RefreshToken { get; set; }
