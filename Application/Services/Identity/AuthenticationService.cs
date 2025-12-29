@@ -48,8 +48,12 @@ namespace Application.Services.Identity
                 }
                 if (user.TwoFactorEnabled)
                 {
-                    var code = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
-                    await SendLoginOtpByEmailAsync(user, code);
+                    var code = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider);
+                    var sendEmailResult = SendLoginOtpByEmail(user, code);
+                    if (!sendEmailResult.IsSuccess)
+                    {
+                        return ServiceResult<AuthenticationResult>.Error("Failed to resend OTP email.");
+                    }
                     return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult()
                     {
                         UserName = user.UserName,
@@ -100,7 +104,95 @@ namespace Application.Services.Identity
             }
         }
 
-        public async Task<ServiceResult> SendLoginOtpByEmailAsync(ApplicationUser user, string code)
+        public async Task<ServiceResult<AuthenticationResult>> RefreshTokenAsync(RefreshTokenRequest request)
+        {
+            try
+            {
+                var storedRefreshToken = _refreshTokenRepository.GetSingleByCondition(rt => rt.Token == request.RefreshToken
+                                             && rt.IsActive
+                                             && rt.ExpiryDate > DateTime.UtcNow, ["User"]);
+
+                if (storedRefreshToken == null)
+                {
+                    return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidRefreshToken);
+                }
+
+                var user = storedRefreshToken.User;
+                if (user == null || !user.IsActive)
+                {
+                    return ServiceResult<AuthenticationResult>.Error(ErrorMessages.UserNotFound);
+                }
+
+                _refreshTokenRepository.Delete(storedRefreshToken);
+                var tokens = await GenerateToken(user, request.IpAddress);
+
+                return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult
+                {
+                    AccessToken = tokens.Item1,
+                    RefreshToken = tokens.Item2,
+                });
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidRefreshToken);
+            }
+        }
+
+        public async Task<ServiceResult> ChangePassword(ChangePasswordRequest changePassword, string userName)
+        {
+            try
+            {
+                var user = await _userManager.FindByNameAsync(userName);
+                if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
+
+                var isValid = await _userManager.CheckPasswordAsync(user, changePassword.OldPassword);
+                if(!isValid) return ServiceResult.Error(ErrorMessages.InvalidPassword);
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var changePasswordResult = await _userManager.ResetPasswordAsync(user, token, changePassword.Password);
+                if (!changePasswordResult.Succeeded)
+                {
+                    foreach (var error in changePasswordResult.Errors)
+                    {
+                        return ServiceResult.Error(error.Description);
+                    }
+                }
+                return ServiceResult.Success();
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.InternalServerError("An error occurred while changing the password.");
+            }
+        }
+
+        public async Task<ServiceResult> ResendLoginOTP(string userName)
+        {
+            try
+            {
+                var user = await _userManager.FindByNameAsync(userName);
+                if (user == null)
+                {
+                    return ServiceResult.Error(ErrorMessages.UserNotFound);
+                }
+                var code = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider);
+                var sendEmailResult = SendLoginOtpByEmail(user, code);
+                if (!sendEmailResult.IsSuccess)
+                {
+                    return ServiceResult.Error("Failed to resend OTP email.");
+                }
+                return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult()
+                {
+                    UserName = user.UserName,
+                    TwoFactorEnabled = true
+                });
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.InternalServerError("An error occurred while resending the OTP.");
+            }
+        }
+        
+        public ServiceResult SendLoginOtpByEmail(ApplicationUser user, string code)
         {
             //if (!user.EmailConfirmed)
             //{

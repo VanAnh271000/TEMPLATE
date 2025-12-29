@@ -22,6 +22,7 @@
         public const string EmailExists = "Email already exists";
         public const string InvalidOTPCode = "Invalid OTP code";
         public const string InvalidCredentials = "Invalid username or password";
+        public const string InvalidPassword = "Invalid password";
         public const string TwoFactorNotEnabled = "Two-factor authentication is not enabled for this user";
         // User
         public const string UserNotFound = "User not found";

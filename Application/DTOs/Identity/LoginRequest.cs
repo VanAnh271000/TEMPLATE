@@ -18,4 +18,10 @@ namespace Application.DTOs.Identity
         public string UserName { get; set; }
         public string IpAddress { get; set; } = string.Empty;
     }
+    public class RefreshTokenRequest
+    {
+        [Required]
+        public string RefreshToken { get; set; } = string.Empty;
+        public string IpAddress { get; set; } = string.Empty;
+    }
 }
