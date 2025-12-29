@@ -14,22 +14,25 @@ namespace Application.Services.Identity
         private readonly IGenericRepository<RefreshToken, int> _refreshTokenRepository;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IConfiguration _configuration;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         public AuthenticationService(SignInManager<ApplicationUser> signInManager,
             IGenericRepository<RefreshToken, int> refreshTokenRepository,
             UserManager<ApplicationUser> userManager,
-            IConfiguration configuration,
             IJwtTokenService jwtTokenService,
+            IConfiguration configuration,
+            IEmailService emailService,
             IUnitOfWork unitOfWork)
         {
             _refreshTokenRepository = refreshTokenRepository;
-            _signInManager = signInManager;
-            _userManager = userManager;
-            _configuration = configuration;
-            _unitOfWork = unitOfWork;
             _jwtTokenService = jwtTokenService;
+            _signInManager = signInManager;
+            _configuration = configuration;
+            _emailService = emailService;
+            _userManager = userManager;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ServiceResult<AuthenticationResult>> LoginAsync(LoginRequest loginRequest)
@@ -178,7 +181,7 @@ namespace Application.Services.Identity
                 var sendEmailResult = SendLoginOtpByEmail(user, code);
                 if (!sendEmailResult.IsSuccess)
                 {
-                    return ServiceResult.Error("Failed to resend OTP email.");
+                    return ServiceResult.Error(ErrorMessages.SendEmailFailed);
                 }
                 return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult()
                 {
@@ -191,18 +194,19 @@ namespace Application.Services.Identity
                 return ServiceResult.InternalServerError("An error occurred while resending the OTP.");
             }
         }
-        
-        public ServiceResult SendLoginOtpByEmail(ApplicationUser user, string code)
+
+        #region Private Methods
+        private ServiceResult SendLoginOtpByEmail(ApplicationUser user, string code)
         {
-            //if (!user.EmailConfirmed)
-            //{
-            //    return ServiceResult.BadRequest("You haven't confirmed your email yet. Please contact admin for support!");
-            //}
-            //var body = $"<p>Hi {user.FullName}</p>" +
-            //    $"<p>Please login with the OTP below.</p>" +
-            //    $"<p><b>{code}</b></p>";
-            //var message = new EmailMessage(new string[] { user.Email }, "[LOGIN OTP]", body);
-            //_emailService.SendEmail(message);
+            if (!user.EmailConfirmed)
+            {
+                return ServiceResult.Error(ErrorMessages.EmailNotConfirmed);
+            }
+            var body = $"<p>Hi {user.FullName}</p>" +
+                $"<p>Please login with the OTP below.</p>" +
+                $"<p><b>{code}</b></p>";
+            var message = new EmailMessage(new string[] { user.Email }, "[LOGIN OTP]", body);
+            _emailService.SendEmail(message);
             return ServiceResult.Success();
         }
 
@@ -224,5 +228,6 @@ namespace Application.Services.Identity
             await _unitOfWork.SaveChangesAsync();
             return new Tuple<string, string>(accessToken, refreshToken);
         }
+        #endregion
     }
 }

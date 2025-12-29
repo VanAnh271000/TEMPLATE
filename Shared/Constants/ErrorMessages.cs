@@ -31,5 +31,7 @@
         public const string GetAccountFailed = "Get account failed";
         public const string CreateAccountFailed = "Create account failed";
         public const string UpdateAccountFailed = "Update account failed";
+        public const string EmailNotConfirmed = "You haven't confirmed your email yet";
+        public const string SendEmailFailed = "Failed to send OTP email.";
     }
 }
