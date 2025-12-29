@@ -8,6 +8,5 @@ namespace Domain.Entities.Identity
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
         public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
-
     }
 }
