@@ -27,7 +27,7 @@ namespace Application.Interfaces.Commons
 
         //Get list of entities by condition
         IEnumerable<TEntity> GetAll(string[] includes = null);
-        IEnumerable<TEntity> GetMulti(Expression<Func<TEntity, bool>> predicate, string[] includes = null);
+        IEnumerable<TEntity> GetMulti(Expression<Func<TEntity, bool>>? predicate, string[] includes = null);
         IEnumerable<TEntity> GetMultiPaging(Expression<Func<TEntity, bool>> filter, out int total, int index = 0, int size = 50, string[] includes = null);
         IEnumerable<TEntity> GetMultiByFilterNoPaging(Expression<Func<TEntity, bool>>? predicate, GenericQueryParameters parameters, string[]? searchProperties, string[]? includes = null);
         PagedResult<TEntity> GetPaged(GenericQueryParameters parameters, string[]? searchProperties, string[]? includes = null);

@@ -9,9 +9,9 @@ namespace Infrastructure.Context
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        private readonly ICurrentUserService _currentUserService;
+        private readonly ICurrentUserService? _currentUserService;
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,
-            ICurrentUserService currentUserService)
+            ICurrentUserService? currentUserService = null)
             : base(options) {
             _currentUserService = currentUserService;
         }
@@ -75,7 +75,7 @@ namespace Infrastructure.Context
             return await base.SaveChangesAsync(cancellationToken);
         }
 
-
+        public virtual DbSet<ApplicationRole> ApplicationRole { get; set; }
         public virtual DbSet<RefreshToken> RefreshToken { get; set; }
         public virtual DbSet<RolePermission> RolePermission { set; get; }
         public virtual DbSet<Permission> Permission { set; get; }

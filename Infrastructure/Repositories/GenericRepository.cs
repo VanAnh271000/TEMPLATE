@@ -116,7 +116,7 @@ namespace Infrastructure.Repositories
             return _context.Set<TEntity>().FirstOrDefault(expression);
         }
 
-        public virtual IEnumerable<TEntity> GetMulti(Expression<Func<TEntity, bool>> predicate, string[] includes = null)
+        public virtual IEnumerable<TEntity> GetMulti(Expression<Func<TEntity, bool>>? predicate, string[] includes = null)
         {
             //HANDLE INCLUDES FOR ASSOCIATED OBJECTS IF APPLICABLE
             if (includes != null && includes.Count() > 0)
@@ -124,13 +124,15 @@ namespace Infrastructure.Repositories
                 var query = _context.Set<TEntity>().Include(includes.First());
                 foreach (var include in includes.Skip(1))
                     query = query.Include(include);
-                return query.Where<TEntity>(predicate).AsQueryable<TEntity>();
+                if (predicate != null)
+                    query = query.Where(predicate);
+                return query.AsQueryable<TEntity>();
             }
 
             return _context.Set<TEntity>().Where<TEntity>(predicate).AsQueryable<TEntity>();
         }
 
-        public virtual IEnumerable<TEntity> GetMultiNoTracking(Expression<Func<TEntity, bool>> predicate, string[] includes = null)
+        public virtual IEnumerable<TEntity> GetMultiNoTracking(Expression<Func<TEntity, bool>>? predicate, string[] includes = null)
         {
             //HANDLE INCLUDES FOR ASSOCIATED OBJECTS IF APPLICABLE
             if (includes != null && includes.Count() > 0)
@@ -138,7 +140,9 @@ namespace Infrastructure.Repositories
                 var query = _context.Set<TEntity>().Include(includes.First());
                 foreach (var include in includes.Skip(1))
                     query = query.Include(include);
-                return query.Where<TEntity>(predicate).AsNoTracking().AsQueryable<TEntity>();
+                if (predicate != null)
+                    query = query.Where(predicate);
+                return query.AsNoTracking().AsQueryable<TEntity>();
             }
 
             return _context.Set<TEntity>().Where<TEntity>(predicate).AsQueryable<TEntity>();
