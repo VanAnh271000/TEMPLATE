@@ -45,9 +45,9 @@ namespace Application.Services.Identity
                 };
                 var result = await _userManager.CreateAsync(user, createAccountDto.Password);
                 if (!result.Succeeded) return ServiceResult<AccountDto>.Error(string.Join(", ", result.Errors.Select(e => e.Description)));
-                var accountDto = _mapper.Map<AccountDto>(result);
+                var accountDto = _mapper.Map<AccountDto>(user);
 
-                var roles = _roleRepository.GetMulti(r => createAccountDto.RoleIds.Contains(r.Id)).ToList();
+                var roles = _roleRepository.GetMulti(r => createAccountDto.RoleIds.Contains(r.Id), ["RolePermissions"]).ToList();
                 accountDto.Roles = _mapper.Map<List<RoleDto>>(roles);
 
                 return ServiceResult<AccountDto>.Success(accountDto);

@@ -8,8 +8,14 @@ namespace Application.Mappings
     {
         public AccountMappingProfile()
         {
-            CreateMap<ApplicationUser, AccountDto>();
+            CreateMap<ApplicationUser, AccountDto>()
+                .ForMember(dest => dest.Roles, opt => opt.Ignore());
             CreateMap<UpdateProfileDto, ApplicationUser>().ReverseMap();
+            CreateMap<Permission, PermissionDto>().ReverseMap();
+            CreateMap<ApplicationRole, RoleDto>()
+                .ForMember(dest => dest.Permissions, opt => opt.Ignore())
+                .ForMember(dest => dest.Accounts, opt => opt.Ignore());
+
         }
     }
 }

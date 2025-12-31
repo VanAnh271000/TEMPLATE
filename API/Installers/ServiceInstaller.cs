@@ -14,10 +14,10 @@ namespace API.Installers
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
             //For Entity Framework Core
-            string? connectionString = configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString)
-            );
+            //string? connectionString = configuration.GetConnectionString("DefaultConnection");
+            //services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(connectionString)
+            //);
             services.AddMemoryCache();
 
             //Http services
