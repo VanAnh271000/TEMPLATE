@@ -7,6 +7,7 @@ using Application.Services.Commons;
 using AutoMapper;
 using Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Shared.Constants;
 using Shared.Results;
 using System.Data;
@@ -17,16 +18,19 @@ namespace Application.Services.Identity
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IGenericRepository<ApplicationRole, string> _roleRepository;
+        private readonly IGenericRepository<UserRole, string> _userRoleRepository;
         private readonly IUserQuery _userQuery;
 
         public AccountService(IGenericRepository<ApplicationUser, string> repository, 
             IGenericRepository<ApplicationRole, string> roleRepository,
+            IGenericRepository<UserRole, string> userRoleRepository,
             IMapper mapper, IUnitOfWork unitOfWork, 
             UserManager<ApplicationUser> userManager,
             IUserQuery userQuery)
             : base(repository, mapper, unitOfWork)
         {
             _roleRepository = roleRepository;
+            _userRoleRepository = userRoleRepository;
             _userManager = userManager;
             _userQuery = userQuery;
         }
@@ -48,6 +52,18 @@ namespace Application.Services.Identity
                 var accountDto = _mapper.Map<AccountDto>(user);
 
                 var roles = _roleRepository.GetMulti(r => createAccountDto.RoleIds.Contains(r.Id), ["RolePermissions"]).ToList();
+                if (roles != null && roles.Any())
+                {
+                    foreach (var role in roles)
+                    {
+                        _userRoleRepository.Add(new UserRole
+                        {
+                            UserId = user.Id,
+                            RoleId = role.Id
+                        });
+                    }
+                    await _unitOfWork.SaveChangesAsync();
+                }
                 accountDto.Roles = _mapper.Map<List<RoleDto>>(roles);
 
                 return ServiceResult<AccountDto>.Success(accountDto);

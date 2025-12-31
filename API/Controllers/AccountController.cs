@@ -2,6 +2,7 @@
 using Application.DTOs.Commons;
 using Application.DTOs.Identity;
 using Application.Interfaces.Services.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -17,7 +18,7 @@ namespace API.Controllers
         }
 
         [HttpPost("Create")]
-        //[Authorize(Policy = "WriteAccount")]
+        [Authorize(Policy = "WriteAccount")]
         public async Task<IActionResult> Create([FromBody] CreateAccountDto dto)
         {
             if (!ModelState.IsValid)
@@ -27,7 +28,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("Delete/{id}")]
-        //[Authorize(Policy = "DeleteAccount")]
+        [Authorize(Policy = "DeleteAccount")]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _accountService.Delete(id);
@@ -35,7 +36,7 @@ namespace API.Controllers
         }
 
         [HttpGet("GetList")]
-        //[Authorize(Policy = "ReadAccount")]
+        [Authorize(Policy = "ReadAccount")]
         public IActionResult GetListAsync([FromQuery] CommonQueryParameters parameters)
         {
             var result = _accountService.GetList(parameters);
