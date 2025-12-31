@@ -16,14 +16,17 @@ namespace Application.Services.Identity
     public class AccountService : GenericService<ApplicationUser, AccountDto, CreateAccountDto, string>, IAccountService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IGenericRepository<ApplicationRole, string> _roleRepository;
         private readonly IUserQuery _userQuery;
 
         public AccountService(IGenericRepository<ApplicationUser, string> repository, 
+            IGenericRepository<ApplicationRole, string> roleRepository,
             IMapper mapper, IUnitOfWork unitOfWork, 
             UserManager<ApplicationUser> userManager,
             IUserQuery userQuery)
             : base(repository, mapper, unitOfWork)
         {
+            _roleRepository = roleRepository;
             _userManager = userManager;
             _userQuery = userQuery;
         }
@@ -34,18 +37,19 @@ namespace Application.Services.Identity
             {
                 var user = new ApplicationUser
                 {
-                    UserName = createAccountDto.Email,
+                    UserName = createAccountDto.UserName,
                     Email = createAccountDto.Email,
                     FullName = createAccountDto.FullName,
                     CreatedTime = DateTime.UtcNow,
                     IsActive = true
                 };
                 var result = await _userManager.CreateAsync(user, createAccountDto.Password);
-                if (!result.Succeeded)
-                {
-                    return ServiceResult<AccountDto>.Error(string.Join(", ", result.Errors.Select(e => e.Description)));
-                }
+                if (!result.Succeeded) return ServiceResult<AccountDto>.Error(string.Join(", ", result.Errors.Select(e => e.Description)));
                 var accountDto = _mapper.Map<AccountDto>(result);
+
+                var roles = _roleRepository.GetMulti(r => createAccountDto.RoleIds.Contains(r.Id)).ToList();
+                accountDto.Roles = _mapper.Map<List<RoleDto>>(roles);
+
                 return ServiceResult<AccountDto>.Success(accountDto);
             }
             catch(Exception ex)

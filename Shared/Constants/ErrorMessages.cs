@@ -25,6 +25,7 @@
         public const string InvalidPassword = "Invalid password";
         public const string TwoFactorNotEnabled = "Two-factor authentication is not enabled for this user";
         // User
+        public const string UpdateProfileFailed = "Update profile failed";
         public const string UserNotFound = "User not found";
         public const string UserAlreadyExists = "User already exists";
         public const string UserNameExits = "Username already exists";
