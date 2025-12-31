@@ -2,7 +2,9 @@
 using Application.Services.Commons;
 using Application.Services.Identity;
 using Infrastructure.Context;
+using Infrastructure.Queries;
 using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Installers
@@ -23,21 +25,22 @@ namespace API.Installers
 
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             
-
             services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 
-            //services.AddHttpClient<IAuthServiceClient, AuthServiceClient>(client =>
-            //{
-            //    client.BaseAddress = new Uri(configuration["JWT:ValidIssuer"]);
-            //});
-
+            services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
             //Repository & service
-            //var appRepositories = typeof(InvoiceRepository).Assembly.GetTypes()
-            //    .Where(type => !type.IsAbstract && !type.IsInterface)
-            //    .Where(r => r.Name.EndsWith("Repository")).ToList();
-            //appRepositories.ForEach(repository => services.AddScoped(repository.GetInterfaces()
-            //                .Where(r => r.Name.EndsWith("Repository")).FirstOrDefault(), repository));
+            var appRepositories = typeof(PermissionRepository).Assembly.GetTypes()
+                .Where(type => !type.IsAbstract && !type.IsInterface)
+                .Where(r => r.Name.EndsWith("Repository")).ToList();
+            appRepositories.ForEach(repository => services.AddScoped(repository.GetInterfaces()
+                            .Where(r => r.Name.EndsWith("Repository")).FirstOrDefault(), repository));
+
+            var appQueries = typeof(UserQuery).Assembly.GetTypes()
+                .Where(type => !type.IsAbstract && !type.IsInterface)
+                .Where(r => r.Name.EndsWith("Query")).ToList();
+            appQueries.ForEach(query => services.AddScoped(query.GetInterfaces()
+                            .Where(r => r.Name.EndsWith("Query")).FirstOrDefault(), query));
 
             var serviceTypes = typeof(AccountService).Assembly.GetTypes()
             .Where(type => !type.IsAbstract && !type.IsInterface)

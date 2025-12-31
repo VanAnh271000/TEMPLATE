@@ -2,10 +2,7 @@
 using Application.DTOs.Identity;
 using Application.Interfaces.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Results;
 
 namespace API.Controllers
 {
