@@ -7,7 +7,6 @@ using Application.Services.Commons;
 using AutoMapper;
 using Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Shared.Constants;
 using Shared.Results;
 using System.Data;

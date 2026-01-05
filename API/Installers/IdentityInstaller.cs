@@ -1,4 +1,5 @@
-﻿using Domain.Entities.Identity;
+﻿using Application.Services.Identity;
+using Domain.Entities.Identity;
 using Infrastructure.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -53,6 +54,21 @@ namespace API.Installers
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"])),
                     };
                 });
+
+            services.AddAuthorization(options =>
+            {
+                #region Account
+                options.AddPolicy("ReadAccount", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("account.read")));
+
+                options.AddPolicy("WriteAccount", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("account.write")));
+
+                options.AddPolicy("DeleteAccount", policy =>
+                    policy.Requirements.Add(new PermissionRequirement("account.delete")));
+                #endregion
+
+            });
 
         }
     }
