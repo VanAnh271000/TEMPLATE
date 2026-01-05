@@ -59,13 +59,13 @@ namespace API.Installers
             {
                 #region Account
                 options.AddPolicy("ReadAccount", policy =>
-                    policy.Requirements.Add(new PermissionRequirement("account.read")));
+                    policy.Requirements.Add(new PermissionRequirement("user.read")));
 
                 options.AddPolicy("WriteAccount", policy =>
-                    policy.Requirements.Add(new PermissionRequirement("account.write")));
+                    policy.Requirements.Add(new PermissionRequirement("user.write")));
 
                 options.AddPolicy("DeleteAccount", policy =>
-                    policy.Requirements.Add(new PermissionRequirement("account.delete")));
+                    policy.Requirements.Add(new PermissionRequirement("user.delete")));
                 #endregion
 
             });

@@ -1,13 +1,22 @@
 ﻿using Application.Interfaces.Commons;
 using Domain.Commons;
 using Domain.Entities.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Context
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<
+        ApplicationUser,
+        ApplicationRole,
+        string,
+        IdentityUserClaim<string>,
+        UserRole,
+        IdentityUserLogin<string>,
+        IdentityRoleClaim<string>,
+        IdentityUserToken<string>>
     {
         private readonly ICurrentUserService? _currentUserService;
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,

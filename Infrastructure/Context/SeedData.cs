@@ -31,7 +31,20 @@ namespace Infrastructure.Context
                     PermissionId = 1
                 }
             );
-
+            builder.Entity<RolePermission>().HasData(
+                new RolePermission
+                {
+                    RoleId = AdminRoleId,
+                    PermissionId = 2
+                }
+            );
+            builder.Entity<RolePermission>().HasData(
+                new RolePermission
+                {
+                    RoleId = AdminRoleId,
+                    PermissionId = 3
+                }
+            );
         }
     }
 }

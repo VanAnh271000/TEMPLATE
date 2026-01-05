@@ -18,7 +18,7 @@ namespace API.Controllers
         }
 
         [HttpPost("Create")]
-        [Authorize(Policy = "WriteAccount")]
+        //[Authorize(Policy = "WriteAccount")]
         public async Task<IActionResult> Create([FromBody] CreateAccountDto dto)
         {
             if (!ModelState.IsValid)
