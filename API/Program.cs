@@ -2,6 +2,7 @@ using API.Installers;
 using API.Middlewares;
 using Infrastructure;
 using Serilog;
+
 namespace API {     
     public class Program
     {
@@ -30,6 +31,8 @@ namespace API {
             app.UseMiddleware<CorrelationIdMiddleware>();
             
             app.MapHealthChecks("/health");
+
+            app.MapPrometheusScrapingEndpoint().AllowAnonymous();
 
             app.UseSecuredHangfireDashboard();
 

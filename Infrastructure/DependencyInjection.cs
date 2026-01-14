@@ -1,10 +1,13 @@
-﻿using Application.Interfaces.Commons;
+﻿using Application.DTOs.Commons;
+using Application.Interfaces.Commons;
 using Hangfire;
 using Infrastructure.Context;
 using Infrastructure.Factories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using OpenTelemetry.Metrics;
 using Serilog;
 
 namespace Infrastructure
@@ -32,10 +35,26 @@ namespace Infrastructure
 
             services.AddHangfireServer();
 
+            //Logging
             Log.Logger = new LoggerConfiguration()
            .ReadFrom.Configuration(configuration)
            .Enrich.FromLogContext()
            .CreateLogger();
+
+            //Health Checks
+            services.AddHealthChecks().AddCheck("self", () => HealthCheckResult.Healthy());
+
+            //Metrics
+            services.AddOpenTelemetry()
+            .WithMetrics(m =>
+            {
+                m.AddAspNetCoreInstrumentation();
+                m.AddRuntimeInstrumentation();
+                m.AddProcessInstrumentation();
+                m.AddMeter(AppMetrics.MeterName);
+                m.AddPrometheusExporter();
+            });
+
 
             return services;
         }
