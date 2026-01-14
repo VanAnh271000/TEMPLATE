@@ -1,6 +1,5 @@
 ﻿using Application.DTOs.Identity;
 using Application.Interfaces.Services.Identity;
-using Microsoft.Extensions.Configuration;
 using MailKit.Net.Smtp;
 using MimeKit;
 
@@ -9,12 +8,9 @@ namespace Application.Services.Identity
     public class EmailService : IEmailService
     {
         private readonly EmailConfiguration _emailConfig;
-        private readonly IConfiguration _configuration;
-        public EmailService(EmailConfiguration emailConfig,
-            IConfiguration configuration)
+        public EmailService(EmailConfiguration emailConfig)
         {
             _emailConfig = emailConfig;
-            _configuration = configuration;
         }
 
         private MimeMessage CreateEmailMessage(EmailMessage message)

@@ -13,9 +13,10 @@ namespace Infrastructure
             this IServiceCollection services,
             IConfiguration configuration)
         {
+            string? connectionString = configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    configuration.GetConnectionString("ConnectionString")));
+                    configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

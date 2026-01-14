@@ -26,4 +26,9 @@ namespace Application.DTOs.Identity
         public string ConfirmEmailPath { get; set; } = null;
         public string ResetPasswordPath { get; set; } = null;
     }
+    public class EmailToken
+    {
+        public string Email { get; set; }
+        public string Token { get; set; }
+    }
 }

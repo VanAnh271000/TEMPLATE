@@ -25,6 +25,7 @@
         public const string InvalidPassword = "Invalid password";
         public const string TwoFactorNotEnabled = "Two-factor authentication is not enabled for this user";
         // User
+        public const string UpdateProfileFailed = "Update profile failed";
         public const string UserNotFound = "User not found";
         public const string UserAlreadyExists = "User already exists";
         public const string UserNameExits = "Username already exists";
@@ -33,5 +34,22 @@
         public const string UpdateAccountFailed = "Update account failed";
         public const string EmailNotConfirmed = "You haven't confirmed your email yet";
         public const string SendEmailFailed = "Failed to send OTP email.";
+
+        //Permission
+        public const string PermissionNotFound = "Permission not found";
+        public const string ErrorRetrivingPermissions = "Error retriving permissions";
+
+        //Role
+        public const string RoleNotFound = "Role not found";
+        public const string UserRoleAlreadyExists = "User role already exists";
+        public const string UserRoleDontExists = "User role does not exist";
+        public const string ErrorRetrivingRoles = "Error retrieving roles";
+        public const string RoleNameIsRequired = "Role name is required";
+        public const string DecriptionIsRequired = "Description is required";
+        public const string AtleastOnePermissionRequired = "At least one role is required";
+        public const string RoleNameAlreadyExists = "Role name already exists";
+        public const string ErrorCreateRole = "Error creating role";
+        public const string ErrorUpdateRole = "Error updating role";
+        public const string ErrorAssignUsersRole = "Error assigning users to role";
     }
 }
