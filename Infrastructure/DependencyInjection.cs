@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Commons;
+using Hangfire;
 using Infrastructure.Context;
 using Infrastructure.Factories;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,12 @@ namespace Infrastructure
                     configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddHangfire(config =>
+            {
+                config.UseSqlServerStorage(connectionString);
+            });
 
+            services.AddHangfireServer();
             return services;
         }
     }

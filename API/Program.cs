@@ -24,12 +24,16 @@ namespace API {
                 });
                 app.UseDeveloperExceptionPage();
             }
+            
+            app.UseSecuredHangfireDashboard();
 
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            app.UseSecuredHangfireDashboard();
 
             app.MapControllers();
 

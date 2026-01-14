@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Identity;
 using Application.Interfaces.Commons;
+using Application.Interfaces.Services.Hangfire;
 using Application.Interfaces.Services.Identity;
 using AutoMapper;
 using Domain.Entities.Identity;
@@ -20,13 +21,16 @@ namespace Application.Services.Identity
         private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IBackgroundTaskService _backgroundTaskService;
+
         public AuthenticationService(SignInManager<ApplicationUser> signInManager,
             IGenericRepository<RefreshToken, int> refreshTokenRepository,
             UserManager<ApplicationUser> userManager,
             IJwtTokenService jwtTokenService,
             IConfiguration configuration,
             IEmailService emailService,
-            IUnitOfWork unitOfWork, IMapper mapper)
+            IUnitOfWork unitOfWork, IMapper mapper,
+            IBackgroundTaskService backgroundTaskService)
         {
             _refreshTokenRepository = refreshTokenRepository;
             _jwtTokenService = jwtTokenService;
@@ -36,6 +40,7 @@ namespace Application.Services.Identity
             _userManager = userManager;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _backgroundTaskService = backgroundTaskService;
         }
 
         public async Task<ServiceResult<AccountDto>> GetCurrentUserAsync(string userName)
@@ -239,7 +244,7 @@ namespace Application.Services.Identity
                         $"<p><a href=\"{confirmationLink}\">Confirm</a></p>" +
                         $"<p>Thank you.</p>";
                 var message = new EmailMessage(new string[] { email }, "[EMAIL CONFIRMATION LINK]", body);
-                _emailService.SendEmail(message);
+                _backgroundTaskService.SendEmailAsync(message);
                 return ServiceResult.Success();
             }
             catch (Exception ex)
