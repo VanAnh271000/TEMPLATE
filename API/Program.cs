@@ -20,7 +20,7 @@ namespace API {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v2/swagger.json", "WholeSale");
+                    c.SwaggerEndpoint("/swagger/v2/swagger.json", "Template");
                 });
                 app.UseDeveloperExceptionPage();
             }

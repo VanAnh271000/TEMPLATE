@@ -3,6 +3,7 @@ using Application.Interfaces.Commons;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Identity;
 using Microsoft.Extensions.Caching.Memory;
+using Serilog;
 using Shared.Constants;
 using Shared.Results;
 
@@ -37,6 +38,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error retrieving permissions for user {UserId}", userId);
                 return ServiceResult<List<string>>.InternalServerError($"{ErrorMessages.ErrorRetrivingPermissions}: {ex.Message}");
             }
         }
@@ -52,6 +54,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error checking permission {Permission} for user {UserId}", permission, userId);
                 return ServiceResult<bool>.InternalServerError($"{ErrorMessages.ErrorRetrivingPermissions}: {ex.Message}");
             }
         }
@@ -71,6 +74,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error retrieving permissions list");
                 return ServiceResult<IEnumerable<PermissionDto>>.InternalServerError($"{ErrorMessages.ErrorRetrivingPermissions}: {ex.Message}");
             }
         }

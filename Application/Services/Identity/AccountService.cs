@@ -7,6 +7,7 @@ using Application.Services.Commons;
 using AutoMapper;
 using Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
+using Serilog;
 using Shared.Constants;
 using Shared.Results;
 using System.Data;
@@ -69,6 +70,7 @@ namespace Application.Services.Identity
             }
             catch(Exception ex)
             {
+                Log.Error(ex, "Error occurred while creating a new user");
                 return ServiceResult<AccountDto>.InternalServerError($"An error occurred while creating the user: {ex.Message}");
             }
         }
@@ -84,6 +86,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error occurred while retrieving account list");
                 return ServiceResult<PagedResult<AccountDto>>.InternalServerError($"{ErrorMessages.GetAccountFailed}: {ex.Message}");
             }
         }
