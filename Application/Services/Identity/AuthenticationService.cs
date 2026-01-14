@@ -119,6 +119,7 @@ namespace Application.Services.Identity
                 {
                     AccessToken = tokens.Item1,
                     RefreshToken = tokens.Item2,
+                    UserName = user.UserName
                 });
             }
             catch (Exception ex)

@@ -1,4 +1,5 @@
 using API.Installers;
+using API.Middlewares;
 using Infrastructure;
 namespace API {     
     public class Program
@@ -24,7 +25,8 @@ namespace API {
                 });
                 app.UseDeveloperExceptionPage();
             }
-            
+            app.UseMiddleware<CorrelationIdMiddleware>();
+
             app.UseSecuredHangfireDashboard();
 
             app.UseHttpsRedirection();
