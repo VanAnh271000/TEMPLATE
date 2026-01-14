@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Commons;
+using Application.Interfaces.Services.Hangfire;
 using Application.Services.Commons;
 using Application.Services.Identity;
-using Infrastructure.Context;
+using Infrastructure.BackgroundJobs.Jobs;
+using Infrastructure.BackgroundJobs.Services;
 using Infrastructure.Queries;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Installers
 {
@@ -13,11 +14,6 @@ namespace API.Installers
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            //For Entity Framework Core
-            //string? connectionString = configuration.GetConnectionString("DefaultConnection");
-            //services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(connectionString)
-            //);
             services.AddMemoryCache();
 
             //Http services
@@ -28,6 +24,10 @@ namespace API.Installers
             services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 
             services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+            services.AddScoped<IBackgroundJobService, BackgroundJobService>();
+            services.AddScoped<IBackgroundTaskService, BackgroundTaskService>();
+            services.AddTransient<EmailJob>();
 
             //Repository & service
             var appRepositories = typeof(PermissionRepository).Assembly.GetTypes()

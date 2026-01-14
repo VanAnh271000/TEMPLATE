@@ -1,6 +1,16 @@
 ﻿namespace Infrastructure.BackgroundJobs.Jobs
 {
-    internal class CleanUpJob
+    public class CleanUpJob
     {
+        // Constructor
+        public CleanUpJob()
+        {
+        }
+
+        public async Task ExecuteAsync()
+        {
+            // cleanup logic
+            // call to service layer to perform cleanup
+        }
     }
 }
