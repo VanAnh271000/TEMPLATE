@@ -1,6 +1,7 @@
 using API.Installers;
 using API.Middlewares;
 using Infrastructure;
+using Serilog;
 namespace API {     
     public class Program
     {
@@ -13,6 +14,7 @@ namespace API {
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
+            builder.Host.UseSerilog();
 
             var app = builder.Build();
 
