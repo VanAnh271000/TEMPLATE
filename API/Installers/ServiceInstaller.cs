@@ -14,6 +14,8 @@ namespace API.Installers
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
+            string? connectionString = configuration.GetConnectionString("DefaultConnection");
+
             services.AddMemoryCache();
 
             //Http services
@@ -26,8 +28,12 @@ namespace API.Installers
             services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
             services.AddScoped<IBackgroundJobService, BackgroundJobService>();
+
             services.AddScoped<IBackgroundTaskService, BackgroundTaskService>();
+
             services.AddTransient<EmailJob>();
+
+            services.AddHealthChecks();
 
             //Repository & service
             var appRepositories = typeof(PermissionRepository).Assembly.GetTypes()

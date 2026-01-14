@@ -26,6 +26,8 @@ namespace API {
                 app.UseDeveloperExceptionPage();
             }
             app.UseMiddleware<CorrelationIdMiddleware>();
+            
+            app.MapHealthChecks("/health");
 
             app.UseSecuredHangfireDashboard();
 
