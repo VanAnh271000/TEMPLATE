@@ -1,4 +1,7 @@
+using API.Authorization;
+using API.Extensions;
 using API.Installers;
+using Hangfire;
 using Infrastructure;
 namespace API {     
     public class Program
@@ -24,6 +27,14 @@ namespace API {
                 });
                 app.UseDeveloperExceptionPage();
             }
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[]
+                {
+                    new HangfireAuthorizationFilter()
+                }
+            });
+            app.UseSecuredHangfireDashboard();
 
             app.UseHttpsRedirection();
 
