@@ -1,0 +1,6 @@
+﻿namespace Infrastructure.BackgroundJobs.Jobs
+{
+    internal class CleanUpJob
+    {
+    }
+}
