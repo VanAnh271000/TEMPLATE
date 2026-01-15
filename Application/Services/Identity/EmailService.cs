@@ -2,6 +2,8 @@
 using Application.Interfaces.Services.Identity;
 using MailKit.Net.Smtp;
 using MimeKit;
+using Serilog;
+using Shared.Results;
 
 namespace Application.Services.Identity
 {
@@ -29,7 +31,7 @@ namespace Application.Services.Identity
             Send(emailMessage);
         }
 
-        private void Send(MimeMessage mailMessage)
+        private ServiceResult Send(MimeMessage mailMessage)
         {
             using var client = new SmtpClient();
             try
@@ -39,10 +41,12 @@ namespace Application.Services.Identity
                 client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
 
                 client.Send(mailMessage);
+                return ServiceResult.Success();
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                Log.Error(ex, "Email could not be sent.");
+                return ServiceResult.InternalServerError("Email could not be sent.");
             }
             finally
             {

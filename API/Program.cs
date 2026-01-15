@@ -1,5 +1,8 @@
 using API.Installers;
+using API.Middlewares;
 using Infrastructure;
+using Serilog;
+
 namespace API {     
     public class Program
     {
@@ -12,6 +15,7 @@ namespace API {
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
+            builder.Host.UseSerilog();
 
             var app = builder.Build();
 
@@ -20,11 +24,18 @@ namespace API {
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v2/swagger.json", "WholeSale");
+                    c.SwaggerEndpoint("/swagger/v2/swagger.json", "Template");
                 });
                 app.UseDeveloperExceptionPage();
             }
             
+            app.UseMiddleware<CorrelationIdMiddleware>();
+            //app.UseMiddleware<RequestMetricsMiddleware>();
+
+            app.MapHealthChecks("/health");
+
+            app.MapPrometheusScrapingEndpoint().AllowAnonymous();
+
             app.UseSecuredHangfireDashboard();
 
             app.UseHttpsRedirection();

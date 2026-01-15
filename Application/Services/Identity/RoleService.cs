@@ -7,6 +7,7 @@ using Application.Services.Commons;
 using AutoMapper;
 using Domain.Entities.Identity;
 using Microsoft.Extensions.Caching.Memory;
+using Serilog;
 using Shared.Constants;
 using Shared.Results;
 using System.Data;
@@ -54,6 +55,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error retrieving roles");
                 return ServiceResult<IEnumerable<RoleDto>>.InternalServerError($"{ErrorMessages.ErrorRetrivingRoles}: {ex.Message}");
             }
         }
@@ -69,6 +71,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error retrieving roles with accounts");
                 return ServiceResult<PagedResult<RoleDto>>.InternalServerError($"{ErrorMessages.ErrorRetrivingRoles}: {ex.Message}");
             }
         }
@@ -106,6 +109,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error creating role");
                 return ServiceResult<RoleDto>.InternalServerError($"{ErrorMessages.ErrorCreateRole}: {ex.Message}");
             }
         }
@@ -182,6 +186,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error updating role");
                 return ServiceResult<RoleDto>.InternalServerError($"{ErrorMessages.ErrorUpdateRole}: {ex.Message}");
             }
         }

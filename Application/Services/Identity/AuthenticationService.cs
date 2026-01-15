@@ -6,6 +6,7 @@ using AutoMapper;
 using Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using Shared.Constants;
 using Shared.Results;
 
@@ -54,6 +55,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in GetCurrentUserAsync");
                 return ServiceResult<AccountDto>.InternalServerError("An error occurred while retrieving the user.");
             }
         }
@@ -78,6 +80,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in RegisterAsync");
                 return ServiceResult<AccountDto>.InternalServerError($"An error occurred while creating the user: {ex.Message}");
             }
         }
@@ -116,10 +119,12 @@ namespace Application.Services.Identity
                 {
                     AccessToken = tokens.Item1,
                     RefreshToken = tokens.Item2,
+                    UserName = user.UserName
                 });
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in LoginAsync");
                 return ServiceResult<AuthenticationResult>.InternalServerError("An error occurred during login.");
             }
         }
@@ -143,6 +148,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in Login2FaAsync");
                 return ServiceResult<AuthenticationResult>.InternalServerError("An error occurred during 2FA login.");
             }
         }
@@ -177,6 +183,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in RefreshTokenAsync");
                 return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidRefreshToken);
             }
         }
@@ -204,6 +211,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ChangePasswordAsync");
                 return ServiceResult.InternalServerError("An error occurred while changing the password.");
             }
         }
@@ -225,6 +233,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ResendLoginOTPAsync");
                 return ServiceResult.InternalServerError("An error occurred while resending the OTP.");
             }
         }
@@ -249,6 +258,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in SendEmailConfirmationLinkAsync");
                 return ServiceResult.InternalServerError("An error occurred while sending the email confirmation link.");
             }
         }
@@ -271,6 +281,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ConfirmEmailAsync");
                 return ServiceResult.InternalServerError("An error occurred while confirming the email.");
             }
         }
@@ -290,6 +301,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in UpdateProfileAsync");
                 return ServiceResult<string>.InternalServerError($"{ErrorMessages.UpdateProfileFailed}: {ex.Message}");
             }
         }
@@ -309,11 +321,12 @@ namespace Application.Services.Identity
                         $"<p><a href=\"{resetLink}\">Reset Password</a></p>" +
                         $"<p>Thank you.</p>";
                 var message = new EmailMessage(new string[] { email }, "[PASSWORD RESET LINK]", body);
-                _emailService.SendEmail(message);
+                _backgroundTaskService.SendEmailAsync(message);
                 return ServiceResult.Success();
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ForgotPasswordByEmailAsync");
                 return ServiceResult.InternalServerError("An error occurred while sending the password reset link.");
             }
         }
@@ -336,6 +349,7 @@ namespace Application.Services.Identity
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "Error in ResetPasswordAsync");
                 return ServiceResult.InternalServerError("An error occurred while resetting the password.");
             }
         }
@@ -352,7 +366,7 @@ namespace Application.Services.Identity
                 $"<p>Please login with the OTP below.</p>" +
                 $"<p><b>{code}</b></p>";
             var message = new EmailMessage(new string[] { user.Email }, "[LOGIN OTP]", body);
-            _emailService.SendEmail(message);
+            _backgroundTaskService.SendEmailAsync(message);
             return ServiceResult.Success();
         }
 
