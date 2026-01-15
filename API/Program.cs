@@ -30,7 +30,6 @@ namespace API {
             }
             
             app.UseMiddleware<CorrelationIdMiddleware>();
-            //app.UseMiddleware<RequestMetricsMiddleware>();
 
             app.MapHealthChecks("/health");
 
