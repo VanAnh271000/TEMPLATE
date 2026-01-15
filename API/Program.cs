@@ -28,8 +28,10 @@ namespace API {
                 });
                 app.UseDeveloperExceptionPage();
             }
-            app.UseMiddleware<CorrelationIdMiddleware>();
             
+            app.UseMiddleware<CorrelationIdMiddleware>();
+            //app.UseMiddleware<RequestMetricsMiddleware>();
+
             app.MapHealthChecks("/health");
 
             app.MapPrometheusScrapingEndpoint().AllowAnonymous();
