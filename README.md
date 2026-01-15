@@ -34,7 +34,7 @@ src/
 
 ## Monitoring & Observability (Prometheus + Grafana)
 This project includes **built-in observability** using **OpenTelemetry**, **Prometheus**, and **Grafana** to monitor application health, performance, and business metrics.
-
+<img width="848" height="739" alt="image" src="https://github.com/user-attachments/assets/93273f2f-1c88-4500-85e1-70c25bebfa40" />
 ### Architecture Overview
 .NET API  
 └── /metrics (OpenTelemetry / Prometheus format)  
