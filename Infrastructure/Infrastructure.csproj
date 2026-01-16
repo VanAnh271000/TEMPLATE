@@ -44,7 +44,6 @@
 
   <ItemGroup>
     <Folder Include="BackgroundJobs\Interfaces\" />
-    <Folder Include="Notification\" />
   </ItemGroup>
 
 </Project>
