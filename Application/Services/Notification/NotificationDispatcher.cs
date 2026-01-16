@@ -16,8 +16,7 @@ namespace Application.Services.Notification
         {
             var sender = _senders.FirstOrDefault(x => x.Channel == message.Channel);
 
-            if (sender is null)
-                throw new InvalidOperationException($"No sender registered for channel {message.Channel}");
+            if (sender is null) throw new InvalidOperationException($"No sender registered for channel {message.Channel}");
 
             await sender.SendAsync(message, ct);
         }
