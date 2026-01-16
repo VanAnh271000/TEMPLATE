@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Behaviors\" />
-    <Folder Include="Services\Notification\" />
     <Folder Include="Validators\" />
   </ItemGroup>
 
