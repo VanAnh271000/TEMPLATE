@@ -2,7 +2,7 @@
 using Domain.Entities.Identity;
 using Infrastructure.Context;
 
-namespace Infrastructure.Repositories
+namespace Infrastructure.Context.Repositories
 {
     public class PermissionRepository : GenericRepository<Permission, int>, IPermissionRepository
     {

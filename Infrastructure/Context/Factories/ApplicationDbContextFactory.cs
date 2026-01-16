@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Factories
+namespace Infrastructure.Context.Factories
 {
     public sealed class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
     {

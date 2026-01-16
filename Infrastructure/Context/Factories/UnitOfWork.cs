@@ -2,7 +2,7 @@
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Infrastructure.Factories
+namespace Infrastructure.Context.Factories
 {
     public class UnitOfWork : IUnitOfWork
     {

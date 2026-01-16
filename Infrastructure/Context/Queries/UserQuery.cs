@@ -5,7 +5,7 @@ using Infrastructure.Context;
 using Shared.Extensions;
 using Shared.Results;
 
-namespace Infrastructure.Queries
+namespace Infrastructure.Context.Queries
 {
     public class UserQuery : IUserQuery
     {

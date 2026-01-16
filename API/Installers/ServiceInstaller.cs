@@ -4,8 +4,8 @@ using Application.Services.Commons;
 using Application.Services.Identity;
 using Infrastructure.BackgroundJobs.Jobs;
 using Infrastructure.BackgroundJobs.Services;
-using Infrastructure.Queries;
-using Infrastructure.Repositories;
+using Infrastructure.Context.Queries;
+using Infrastructure.Context.Repositories;
 using Microsoft.AspNetCore.Authorization;
 
 namespace API.Installers

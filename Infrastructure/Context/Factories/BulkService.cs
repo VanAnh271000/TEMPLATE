@@ -2,7 +2,7 @@
 using EFCore.BulkExtensions;
 using Infrastructure.Context;
 
-namespace Infrastructure.Factories
+namespace Infrastructure.Context.Factories
 {
     public class BulkService : IBulkService
     {
