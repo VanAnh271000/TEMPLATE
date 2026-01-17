@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Notification;
 using Application.Interfaces.Services.Notification;
+using Serilog.Context;
 
 namespace Infrastructure.BackgroundJobs.Jobs
 {
@@ -12,9 +13,21 @@ namespace Infrastructure.BackgroundJobs.Jobs
             _dispatcher = dispatcher;
         }
 
-        public async Task ExecuteAsync(NotificationMessage message)
+        public async Task ExecuteAsync(
+        NotificationMessage message,
+        string? correlationId = null)
         {
-            await _dispatcher.DispatchAsync(message);
+            if (!string.IsNullOrEmpty(correlationId))
+            {
+                using (LogContext.PushProperty("CorrelationId", correlationId))
+                {
+                    await _dispatcher.DispatchAsync(message);
+                }
+            }
+            else
+            {
+                await _dispatcher.DispatchAsync(message);
+            }
         }
     }
 }
