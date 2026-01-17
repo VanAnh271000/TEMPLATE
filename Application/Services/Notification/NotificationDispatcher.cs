@@ -1,24 +1,30 @@
 ﻿using Application.DTOs.Notification;
 using Application.Interfaces.Services.Notification;
+using Serilog;
 
 namespace Application.Services.Notification
 {
     public class NotificationDispatcher : INotificationDispatcher
     {
-        private readonly IEnumerable<INotificationSender> _senders;
+        private readonly IEnumerable<INotificationChannel> _channels;
 
-        public NotificationDispatcher(IEnumerable<INotificationSender> senders)
+        public NotificationDispatcher(IEnumerable<INotificationChannel> channels)
         {
-            _senders = senders;
+            _channels = channels;
         }
 
         public async Task DispatchAsync(NotificationMessage message, CancellationToken ct = default)
         {
-            var sender = _senders.FirstOrDefault(x => x.Channel == message.Channel);
+            foreach (var channel in _channels)
+            {
+                if (!channel.CanHandle(message)) continue;
 
-            if (sender is null) throw new InvalidOperationException($"No sender registered for channel {message.Channel}");
+                Log.Information(
+                    "Sending notification via {Channel}",
+                    channel.GetType().Name);
 
-            await sender.SendAsync(message, ct);
+                await channel.SendAsync(message);
+            }
         }
     }
 }

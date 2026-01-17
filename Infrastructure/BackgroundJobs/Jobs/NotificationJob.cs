@@ -13,9 +13,7 @@ namespace Infrastructure.BackgroundJobs.Jobs
             _dispatcher = dispatcher;
         }
 
-        public async Task ExecuteAsync(
-        NotificationMessage message,
-        string? correlationId = null)
+        public async Task ExecuteAsync(NotificationMessage message, string? correlationId = null)
         {
             if (!string.IsNullOrEmpty(correlationId))
             {

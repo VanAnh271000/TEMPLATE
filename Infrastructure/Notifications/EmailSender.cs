@@ -1,21 +1,29 @@
 ﻿using Application.DTOs.Identity;
-using Application.Interfaces.Services.Identity;
+using Application.DTOs.Notification;
+using Application.Interfaces.Services.Notification.Senders;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Serilog;
 using Shared.Results;
 
-namespace Application.Services.Identity
+namespace Infrastructure.Notifications
 {
-    public class EmailService : IEmailService
+    public class SmtpEmailSender : IEmailSender
     {
         private readonly EmailConfiguration _emailConfig;
-        public EmailService(EmailConfiguration emailConfig)
+        public SmtpEmailSender(EmailConfiguration emailConfig)
         {
             _emailConfig = emailConfig;
         }
+        
+        public async Task SendAsync(EmailNotification message)
+        {
+            var emailMessage = CreateEmailMessage(message);
+            await Send(emailMessage);
+        }
 
-        private MimeMessage CreateEmailMessage(EmailMessage message)
+        #region Private Methods
+        private MimeMessage CreateEmailMessage(EmailNotification message)
         {
             var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress(_emailConfig.ApplicationName, _emailConfig.From));
@@ -25,13 +33,7 @@ namespace Application.Services.Identity
             return emailMessage;
         }
 
-        public void SendEmail(EmailMessage message)
-        {
-            var emailMessage = CreateEmailMessage(message);
-            Send(emailMessage);
-        }
-
-        private ServiceResult Send(MimeMessage mailMessage)
+        private async Task<ServiceResult> Send(MimeMessage mailMessage)
         {
             using var client = new SmtpClient();
             try
@@ -40,7 +42,7 @@ namespace Application.Services.Identity
                 client.AuthenticationMechanisms.Remove("XOAUTH2");
                 client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
 
-                client.Send(mailMessage);
+                await client.SendAsync(mailMessage);
                 return ServiceResult.Success();
             }
             catch (Exception ex)
@@ -54,5 +56,7 @@ namespace Application.Services.Identity
                 client.Dispose();
             }
         }
+
+        #endregion
     }
 }

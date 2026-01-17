@@ -1,7 +1,9 @@
 ﻿using Application.DTOs.Identity;
+using Application.DTOs.Notification;
 using Application.Interfaces.Commons;
 using Application.Interfaces.Services.Hangfire;
 using Application.Interfaces.Services.Identity;
+using Application.Interfaces.Services.Notification;
 using AutoMapper;
 using Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -17,31 +19,28 @@ namespace Application.Services.Identity
         private readonly IGenericRepository<RefreshToken, int> _refreshTokenRepository;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly INotificationService _notificationService;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IConfiguration _configuration;
-        private readonly IEmailService _emailService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IBackgroundTaskService _backgroundTaskService;
 
         public AuthenticationService(SignInManager<ApplicationUser> signInManager,
             IGenericRepository<RefreshToken, int> refreshTokenRepository,
             UserManager<ApplicationUser> userManager,
+            INotificationService notificationService,
             IJwtTokenService jwtTokenService,
             IConfiguration configuration,
-            IEmailService emailService,
-            IUnitOfWork unitOfWork, IMapper mapper,
-            IBackgroundTaskService backgroundTaskService)
+            IUnitOfWork unitOfWork, IMapper mapper)
         {
             _refreshTokenRepository = refreshTokenRepository;
+            _notificationService = notificationService;
             _jwtTokenService = jwtTokenService;
             _signInManager = signInManager;
             _configuration = configuration;
-            _emailService = emailService;
             _userManager = userManager;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _backgroundTaskService = backgroundTaskService;
         }
 
         public async Task<ServiceResult<AccountDto>> GetCurrentUserAsync(string userName)
@@ -252,8 +251,13 @@ namespace Application.Services.Identity
                         $"<p>Please confirm your email by clicking in the link below.</p>" +
                         $"<p><a href=\"{confirmationLink}\">Confirm</a></p>" +
                         $"<p>Thank you.</p>";
-                var message = new EmailMessage(new string[] { email }, "[EMAIL CONFIRMATION LINK]", body);
-                _backgroundTaskService.SendEmailAsync(message);
+                var message = new NotificationMessage()
+                {
+                    Email = email,
+                    Title = "[EMAIL CONFIRMATION LINK]",
+                    Content = body
+                };
+                _notificationService.SendAsync(message);
                 return ServiceResult.Success();
             }
             catch (Exception ex)
@@ -320,8 +324,12 @@ namespace Application.Services.Identity
                         $"<p>Please reset your password by clicking in the link below.</p>" +
                         $"<p><a href=\"{resetLink}\">Reset Password</a></p>" +
                         $"<p>Thank you.</p>";
-                var message = new EmailMessage(new string[] { email }, "[PASSWORD RESET LINK]", body);
-                _backgroundTaskService.SendEmailAsync(message);
+                var message = new NotificationMessage() { 
+                    Email = email,
+                    Title = "[PASSWORD RESET LINK]",
+                    Content = body
+                };
+                _notificationService.SendAsync(message);
                 return ServiceResult.Success();
             }
             catch (Exception ex)
@@ -365,8 +373,12 @@ namespace Application.Services.Identity
             var body = $"<p>Hi {user.FullName}</p>" +
                 $"<p>Please login with the OTP below.</p>" +
                 $"<p><b>{code}</b></p>";
-            var message = new EmailMessage(new string[] { user.Email }, "[LOGIN OTP]", body);
-            _backgroundTaskService.SendEmailAsync(message);
+            var message = new NotificationMessage() { 
+                Email = user.Email,
+                Title = "[LOGIN OTP CODE]",
+                Content = body
+            };
+            _notificationService.SendAsync(message);
             return ServiceResult.Success();
         }
 

@@ -2,10 +2,13 @@
 {
     public class NotificationMessage
     {
-        public string RecipientId { get; init; } = default!;
-        public NotificationChannel Channel { get; init; }
-        public string Subject { get; init; } = default!;
+        public string Title { get; init; } = default!;
         public string Content { get; init; } = default!;
-        public Dictionary<string, string>? Metadata { get; init; }
+
+        public string? Email { get; init; }
+        public string? PhoneNumber { get; init; }
+        public string? FirebaseToken { get; init; }
+
+        public IDictionary<string, string>? Metadata { get; init; }
     }
 }
