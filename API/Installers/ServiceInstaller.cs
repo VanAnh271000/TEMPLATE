@@ -31,7 +31,7 @@ namespace API.Installers
 
             services.AddScoped<IBackgroundTaskService, BackgroundTaskService>();
 
-            services.AddTransient<EmailJob>();
+            services.AddTransient<NotificationJob>();
 
             services.AddHealthChecks();
 
