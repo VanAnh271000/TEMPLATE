@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics.Metrics;
 
-namespace Application.DTOs.Commons
+namespace Application.DTOs.Metrics
 {
     public class NotificationMetrics
     {
-        public const string MeterName = "app.notifications";
+        public const string MeterName = "Template.notifications";
 
         private static readonly Meter Meter = new(MeterName);
 
