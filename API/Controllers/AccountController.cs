@@ -39,7 +39,7 @@ namespace API.Controllers
         [Authorize(Policy = "ReadAccount")]
         public IActionResult GetListAsync([FromQuery] CommonQueryParameters parameters)
         {
-            var result = _accountService.GetList(parameters);
+            var result = _accountService.GetListAsync(parameters);
             return HandleServiceResult(result);
         }
 
