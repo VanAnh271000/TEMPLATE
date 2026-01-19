@@ -16,7 +16,7 @@ namespace API.Installers
             var redisConfig = configuration.GetSection("Redis").Get<RedisConfiguration>();
             services.AddSingleton(redisConfig);
             
-            services.AddSingleton(new RedisConnection(redisConfig.ConnectionString!));
+            services.AddSingleton(new RedisConnection(redisConfig));
             services.AddScoped<ICacheService, RedisCacheService>();
         }
     }

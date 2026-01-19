@@ -70,8 +70,7 @@ namespace Application.Services.Identity
                     await _unitOfWork.SaveChangesAsync();
                 }
                 accountDto.Roles = _mapper.Map<List<RoleDto>>(roles);
-                await _cache.RemoveAsync(UserCacheKeys.UserById(user.Id));
-                await _cache.RemoveByPrefixAsync($"user:query:");
+                await _cache.RemoveByPrefixesAsync(UserCacheKeys.UserPrefix, $"user:query:");
                 return ServiceResult<AccountDto>.Success(accountDto);
             }
             catch(Exception ex)
@@ -86,16 +85,14 @@ namespace Application.Services.Identity
             try
             {
                 var queryHash = parameters.ToSha256Hash();
-                var cacheKey = UserCacheKeys.UserQuery(queryHash);
-                var cached = await _cache.GetAsync<PagedResult<AccountDto>>(cacheKey);
-                if(cached != null)
-                {
-                    return ServiceResult<PagedResult<AccountDto>>.Success(cached);
-                }
-                var result = _userQuery.GetList(parameters, new[] { "UserName", "FullName", "Department.Name" });
-                if (result == null) return ServiceResult<PagedResult<AccountDto>>.NotFound(ErrorMessages.UserNotFound);
-                await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5));
-                return ServiceResult<PagedResult<AccountDto>>.Success(result);
+                return await _cache.GetOrSetAsync(
+                    UserCacheKeys.UserQuery(queryHash),
+                    async() => {
+                        var result = _userQuery.GetList(parameters, new[] { "UserName", "FullName", "Department.Name" });
+                        if (result == null) return ServiceResult<PagedResult<AccountDto>>.NotFound(ErrorMessages.UserNotFound);
+                        return ServiceResult<PagedResult<AccountDto>>.Success(result);
+                    }, 
+                    TimeSpan.FromMinutes(5));
             }
             catch (Exception ex)
             {
