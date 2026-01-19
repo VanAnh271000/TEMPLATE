@@ -8,7 +8,7 @@ namespace API.Installers
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
             services.AddMemoryCache();
-            services.AddScoped<ICacheService, MemoryCacheService>();
+            services.AddScoped<ICacheService, CacheService>();
         }
     }
 }

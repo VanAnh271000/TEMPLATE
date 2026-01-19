@@ -1,4 +1,4 @@
-﻿namespace Application.Services.Caching
+﻿namespace Infrastructure.Caching
 {
     public class RedisCacheService
     {

@@ -4,6 +4,7 @@ using Application.DTOs.Identity;
 using Application.Interfaces.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace API.Controllers
 {
@@ -37,9 +38,9 @@ namespace API.Controllers
 
         [HttpGet("GetList")]
         [Authorize(Policy = "ReadAccount")]
-        public IActionResult GetListAsync([FromQuery] CommonQueryParameters parameters)
+        public async Task<IActionResult> GetListAsync([FromQuery] CommonQueryParameters parameters)
         {
-            var result = _accountService.GetListAsync(parameters);
+            var result = await _accountService.GetListAsync(parameters);
             return HandleServiceResult(result);
         }
 

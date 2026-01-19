@@ -3,7 +3,7 @@ using Application.Interfaces.Services.Caching;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
 
-namespace Application.Services.Caching
+namespace Infrastructure.Caching
 {
     public class CacheService : ICacheService
     {
