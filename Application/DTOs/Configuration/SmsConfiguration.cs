@@ -1,4 +1,4 @@
-﻿namespace Application.DTOs.Identity
+﻿namespace Application.DTOs.Configuration
 {
     public class SmsConfiguration
     {

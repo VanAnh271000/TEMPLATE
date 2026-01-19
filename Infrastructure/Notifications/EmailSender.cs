@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Identity;
+﻿using Application.DTOs.Configuration;
 using Application.DTOs.Notification;
 using Application.Interfaces.Services.Notification.Senders;
 using MailKit.Net.Smtp;

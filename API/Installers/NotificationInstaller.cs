@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Identity;
+﻿using Application.DTOs.Configuration;
 
 namespace API.Installers
 {
@@ -15,6 +15,15 @@ namespace API.Installers
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
             var emailConfig = configuration.GetSection("SmsConfiguration").Get<SmsConfiguration>();
+            services.AddSingleton(emailConfig);
+        }
+    }
+
+    public class FirebaseInstaller : IInstaller
+    {
+        public void InstallServices(IServiceCollection services, IConfiguration configuration)
+        {
+            var emailConfig = configuration.GetSection("FirebaseConfiguration").Get<FirebaseConfiguration>();
             services.AddSingleton(emailConfig);
         }
     }

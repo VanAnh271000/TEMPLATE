@@ -1,7 +1,6 @@
-﻿using Application.DTOs.Identity;
+﻿using Application.DTOs.Configuration;
 using Application.DTOs.Notification;
 using Application.Interfaces.Services.Notification.Senders;
-using System.Net.Http;
 using System.Net.Http.Json;
 
 namespace Infrastructure.Notifications
