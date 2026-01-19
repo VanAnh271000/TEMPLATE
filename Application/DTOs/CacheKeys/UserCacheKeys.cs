@@ -2,10 +2,12 @@
 {
     public class UserCacheKeys
     {
+        public const string UserPrefix = "user:entity:";
+        public const string QueryPrefix = "user:query:";
         public static string UserById(string userId)
-        => $"user:entity:{userId}";
+        => $"{UserPrefix}:{userId}";
 
         public static string UserQuery(string queryHash)
-            => $"user:query:{queryHash}";
+            => $"{QueryPrefix}:{queryHash}";
     }
 }
