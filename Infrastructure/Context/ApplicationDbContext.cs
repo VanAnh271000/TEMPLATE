@@ -89,5 +89,6 @@ namespace Infrastructure.Context
         public virtual DbSet<RolePermission> RolePermission { set; get; }
         public virtual DbSet<Permission> Permission { set; get; }
         public virtual DbSet<UserRole> UserRole { set; get; }
-    }
+        public virtual DbSet<FirebaseToken> FirebaseToken { set; get; }
+        }
 }

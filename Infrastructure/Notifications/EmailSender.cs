@@ -1,21 +1,31 @@
-﻿using Application.DTOs.Identity;
-using Application.Interfaces.Services.Identity;
+﻿using Application.DTOs.Commons;
+using Application.DTOs.Configuration;
+using Application.DTOs.Notification;
+using Application.Interfaces.Services.Notification.Senders;
 using MailKit.Net.Smtp;
 using MimeKit;
 using Serilog;
 using Shared.Results;
+using System.Diagnostics;
 
-namespace Application.Services.Identity
+namespace Infrastructure.Notifications
 {
-    public class EmailService : IEmailService
+    public class EmailSender : IEmailSender
     {
         private readonly EmailConfiguration _emailConfig;
-        public EmailService(EmailConfiguration emailConfig)
+        public EmailSender(EmailConfiguration emailConfig)
         {
             _emailConfig = emailConfig;
         }
+        
+        public async Task SendAsync(EmailNotification message)
+        {
+            var emailMessage = CreateEmailMessage(message);
+            await Send(emailMessage);
+        }
 
-        private MimeMessage CreateEmailMessage(EmailMessage message)
+        #region Private Methods
+        private MimeMessage CreateEmailMessage(EmailNotification message)
         {
             var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress(_emailConfig.ApplicationName, _emailConfig.From));
@@ -25,14 +35,15 @@ namespace Application.Services.Identity
             return emailMessage;
         }
 
-        public void SendEmail(EmailMessage message)
+        private async Task<ServiceResult> Send(MimeMessage mailMessage)
         {
-            var emailMessage = CreateEmailMessage(message);
-            Send(emailMessage);
-        }
+            var sw = Stopwatch.StartNew();
 
-        private ServiceResult Send(MimeMessage mailMessage)
-        {
+            NotificationMetrics.SendTotal.Add(1,
+                new KeyValuePair<string, object?>[]
+                {
+                    new("channel", "email")
+                });
             using var client = new SmtpClient();
             try
             {
@@ -40,11 +51,13 @@ namespace Application.Services.Identity
                 client.AuthenticationMechanisms.Remove("XOAUTH2");
                 client.Authenticate(_emailConfig.UserName, _emailConfig.Password);
 
-                client.Send(mailMessage);
+                await client.SendAsync(mailMessage);
                 return ServiceResult.Success();
             }
             catch (Exception ex)
             {
+                NotificationMetrics.SendFailed.Add(1,
+                    new KeyValuePair<string, object?>[] { new("channel", "email") });
                 Log.Error(ex, "Email could not be sent.");
                 return ServiceResult.InternalServerError("Email could not be sent.");
             }
@@ -52,7 +65,14 @@ namespace Application.Services.Identity
             {
                 client.Disconnect(true);
                 client.Dispose();
+                sw.Stop();
+
+                NotificationMetrics.SendDuration.Record(
+                    sw.Elapsed.TotalSeconds,
+                    new KeyValuePair<string, object?>[] { new("channel", "email") });
             }
         }
+
+        #endregion
     }
 }

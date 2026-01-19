@@ -6,7 +6,7 @@ using Shared.QueryParameter;
 using Shared.Results;
 using System.Linq.Expressions;
 
-namespace Infrastructure.Repositories
+namespace Infrastructure.Context.Repositories
 {
     public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey> where TEntity : class
     {
@@ -15,8 +15,8 @@ namespace Infrastructure.Repositories
 
         public GenericRepository(ApplicationDbContext context)
         {
-            this._context = context;
-            this._dbSet = _context.Set<TEntity>();
+            _context = context;
+            _dbSet = _context.Set<TEntity>();
         }
 
         #region Implementation
@@ -56,7 +56,7 @@ namespace Infrastructure.Repositories
 
         public virtual void DeleteMulti(Expression<Func<TEntity, bool>> where)
         {
-            IEnumerable<TEntity> objects = _dbSet.Where<TEntity>(where).AsEnumerable();
+            IEnumerable<TEntity> objects = _dbSet.Where(where).AsEnumerable();
             foreach (TEntity obj in objects)
                 _dbSet.Remove(obj);
         }
@@ -126,10 +126,10 @@ namespace Infrastructure.Repositories
                     query = query.Include(include);
                 if (predicate != null)
                     query = query.Where(predicate);
-                return query.AsQueryable<TEntity>();
+                return query.AsQueryable();
             }
 
-            return _context.Set<TEntity>().Where<TEntity>(predicate).AsQueryable<TEntity>();
+            return _context.Set<TEntity>().Where(predicate).AsQueryable();
         }
 
         public virtual IEnumerable<TEntity> GetMultiNoTracking(Expression<Func<TEntity, bool>>? predicate, string[] includes = null)
@@ -142,10 +142,10 @@ namespace Infrastructure.Repositories
                     query = query.Include(include);
                 if (predicate != null)
                     query = query.Where(predicate);
-                return query.AsNoTracking().AsQueryable<TEntity>();
+                return query.AsNoTracking().AsQueryable();
             }
 
-            return _context.Set<TEntity>().Where<TEntity>(predicate).AsQueryable<TEntity>();
+            return _context.Set<TEntity>().Where(predicate).AsQueryable();
         }
 
         public virtual IEnumerable<TEntity> GetMultiByFilterNoPaging(Expression<Func<TEntity, bool>>? predicate, GenericQueryParameters parameters, string[]? searchProperties, string[]? includes = null)
@@ -185,11 +185,11 @@ namespace Infrastructure.Repositories
                 var query = _context.Set<TEntity>().Include(includes.First());
                 foreach (var include in includes.Skip(1))
                     query = query.Include(include);
-                _resetSet = predicate != null ? query.Where<TEntity>(predicate).AsQueryable() : query.AsQueryable();
+                _resetSet = predicate != null ? query.Where(predicate).AsQueryable() : query.AsQueryable();
             }
             else
             {
-                _resetSet = predicate != null ? _context.Set<TEntity>().Where<TEntity>(predicate).AsQueryable() : _context.Set<TEntity>().AsQueryable();
+                _resetSet = predicate != null ? _context.Set<TEntity>().Where(predicate).AsQueryable() : _context.Set<TEntity>().AsQueryable();
             }
 
             _resetSet = skipCount == 0 ? _resetSet.Take(size) : _resetSet.Skip(skipCount).Take(size);
@@ -235,7 +235,7 @@ namespace Infrastructure.Repositories
 
         public bool CheckContains(Expression<Func<TEntity, bool>> predicate)
         {
-            return _context.Set<TEntity>().Count<TEntity>(predicate) > 0;
+            return _context.Set<TEntity>().Count(predicate) > 0;
         }
 
         public TEntity GetSingleById(string id)

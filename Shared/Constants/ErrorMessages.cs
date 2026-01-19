@@ -51,5 +51,13 @@
         public const string ErrorCreateRole = "Error creating role";
         public const string ErrorUpdateRole = "Error updating role";
         public const string ErrorAssignUsersRole = "Error assigning users to role";
+
+        //Firebase
+        public const string FirebaseTokenAlreadyExists = "Firebase token already exists";
+        public const string FirebaseTokenNotFound = "Firebase token not found";
+        public const string ErrorRegisteringFirebaseToken = "An error occurred while registering the Firebase token";
+        public const string ErrorRemovingFirebaseToken = "An error occurred while removing the Firebase token"; 
+        public const string ErrorDeactivatingFirebase = "An error occurred while deactivating the Firebase token";
+        public const string ErrorRetrievingFirebaseTokens = "An error occurred while retrieving Firebase tokens";
     }
 }

@@ -2,7 +2,7 @@
 using Application.Interfaces.Commons;
 using Hangfire;
 using Infrastructure.Context;
-using Infrastructure.Factories;
+using Infrastructure.Context.Factories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,6 +52,8 @@ namespace Infrastructure
                 m.AddRuntimeInstrumentation();
                 m.AddProcessInstrumentation();
                 m.AddMeter(AppMetrics.MeterName);
+                m.AddMeter(NotificationMetrics.MeterName);
+
                 m.AddPrometheusExporter();
             });
 

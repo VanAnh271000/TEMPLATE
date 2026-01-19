@@ -1,5 +1,6 @@
 using API.Installers;
 using API.Middlewares;
+using Application.DTOs.Commons;
 using Infrastructure;
 using Serilog;
 
@@ -30,7 +31,6 @@ namespace API {
             }
             
             app.UseMiddleware<CorrelationIdMiddleware>();
-            //app.UseMiddleware<RequestMetricsMiddleware>();
 
             app.MapHealthChecks("/health");
 

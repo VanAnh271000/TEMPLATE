@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Identity;
+﻿using Application.DTOs.Notification;
 using Application.Interfaces.Services.Hangfire;
 using Infrastructure.BackgroundJobs.Jobs;
 
@@ -11,9 +11,10 @@ namespace Infrastructure.BackgroundJobs.Services
         {
             _backgroundJobService = backgroundJobService;
         }
-        public Task SendEmailAsync(EmailMessage message)
+
+        public Task SendNotificationAsync(NotificationMessage message, string correlationId)
         {
-            _backgroundJobService.Enqueue<EmailJob>(x => x.SendJob(message));
+            _backgroundJobService.Enqueue<NotificationJob>(x => x.ExecuteAsync(message, correlationId));
             return Task.CompletedTask;
         }
     }
