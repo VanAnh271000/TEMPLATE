@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Commons;
+﻿using Application.DTOs.Metrics;
 using Application.Interfaces.Commons;
 using Hangfire;
 using Infrastructure.Context;
@@ -53,7 +53,7 @@ namespace Infrastructure
                 m.AddProcessInstrumentation();
                 m.AddMeter(AppMetrics.MeterName);
                 m.AddMeter(NotificationMetrics.MeterName);
-
+                m.AddMeter(CacheMetrics.MeterName);
                 m.AddPrometheusExporter();
             });
 
