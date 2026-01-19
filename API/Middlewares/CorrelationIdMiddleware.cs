@@ -1,4 +1,5 @@
-﻿using Serilog.Context;
+﻿using Application.DTOs.Commons;
+using Serilog.Context;
 
 namespace API.Middlewares
 {
@@ -23,6 +24,7 @@ namespace API.Middlewares
 
             using (LogContext.PushProperty("CorrelationId", correlationId))
             {
+                NotificationMetrics.SendTotal.Add(1);
                 await _next(context);
             }
         }

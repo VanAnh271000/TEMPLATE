@@ -10,10 +10,10 @@ using System.Diagnostics;
 
 namespace Infrastructure.Notifications
 {
-    public class SmtpEmailSender : IEmailSender
+    public class EmailSender : IEmailSender
     {
         private readonly EmailConfiguration _emailConfig;
-        public SmtpEmailSender(EmailConfiguration emailConfig)
+        public EmailSender(EmailConfiguration emailConfig)
         {
             _emailConfig = emailConfig;
         }

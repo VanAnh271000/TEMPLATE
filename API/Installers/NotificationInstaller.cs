@@ -1,8 +1,25 @@
 ﻿using Application.DTOs.Configuration;
+using Application.Interfaces.Services.Notification;
+using Application.Interfaces.Services.Notification.Senders;
+using Application.Services.Notification;
+using Infrastructure.BackgroundJobs.Jobs;
+using Infrastructure.Notifications;
 
 namespace API.Installers
 {
     public class NotificationInstaller : IInstaller
+    {
+        public void InstallServices(IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
+            services.AddScoped<ISmsSender, SmsSender>();
+            services.AddScoped<IFirebaseSender, FirebaseSender>();
+            services.AddScoped<IEmailSender, EmailSender>();
+
+            services.AddTransient<NotificationJob>();
+        }
+    }
+    public class EmailInstaller : IInstaller
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
@@ -14,8 +31,8 @@ namespace API.Installers
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            var emailConfig = configuration.GetSection("SmsConfiguration").Get<SmsConfiguration>();
-            services.AddSingleton(emailConfig);
+            var smsConfig = configuration.GetSection("SmsConfiguration").Get<SmsConfiguration>();
+            services.AddSingleton(smsConfig);
         }
     }
 
@@ -23,8 +40,8 @@ namespace API.Installers
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            var emailConfig = configuration.GetSection("FirebaseConfiguration").Get<FirebaseConfiguration>();
-            services.AddSingleton(emailConfig);
+            var firebaseConfig = configuration.GetSection("FirebaseConfiguration").Get<FirebaseConfiguration>();
+            services.AddSingleton(firebaseConfig);
         }
     }
 }
