@@ -76,21 +76,14 @@ Use http or **insecure_skip_verify: true* for local development.
 In production, use https with a valid certificate.
 #### 2. Run Prometheus
 ```bash
-docker run -d \
-  -p 9090:9090 \
-  -v $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml \
-  --name prometheus \
-  prom/prometheus
+docker run -d  -p 9090:9090 -v %cd%/prometheus.yml:/etc/prometheus/prometheus.yml --name prometheus prom/prometheus
 ```
 Access Prometheus UI: http://localhost:9090
 Check scrape status: Status → Targets
 ### Running Grafana
 #### 1. Start Grafana
 ```bash
-docker run -d \
-  -p 3000:3000 \
-  --name grafana \
-  grafana/grafana
+docker run -d -p 3000:3000 --name grafana grafana/grafana
 ```
 - Grafana UI: http://localhost:3000
 - Default login: Username - admin, Password: admin
