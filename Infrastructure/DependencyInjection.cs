@@ -52,6 +52,8 @@ namespace Infrastructure
                 m.AddRuntimeInstrumentation();
                 m.AddProcessInstrumentation();
                 m.AddMeter(AppMetrics.MeterName);
+                m.AddMeter(NotificationMetrics.MeterName);
+
                 m.AddPrometheusExporter();
             });
 

@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Configuration;
+﻿using Application.DTOs.Commons;
+using Application.DTOs.Configuration;
 using Application.DTOs.Notification;
 using Application.Interfaces.Services.Notification.Senders;
 using FirebaseAdmin;
@@ -6,6 +7,7 @@ using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Newtonsoft.Json;
 using Serilog;
+using System.Diagnostics;
 
 namespace Infrastructure.Notifications
 {
@@ -49,18 +51,43 @@ namespace Infrastructure.Notifications
 
         public async Task SendAsync(FirebaseNotification notification)
         {
-            var message = new Message
-            {
-                Token = notification.DeviceToken,
-                Notification = new Notification
-                {
-                    Title = notification.Title,
-                    Body = notification.Body
-                },
-                Data = notification.Data
-            };
+            var sw = Stopwatch.StartNew();
 
-            await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            NotificationMetrics.SendTotal.Add(1,
+                new KeyValuePair<string, object?>[]
+                {
+                    new("channel", "firebase")
+                });
+
+            try
+            {
+                var message = new Message
+                {
+                    Token = notification.DeviceToken,
+                    Notification = new Notification
+                    {
+                        Title = notification.Title,
+                        Body = notification.Body
+                    },
+                    Data = notification.Data
+                };
+
+                await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            }
+            catch (Exception)
+            {
+                NotificationMetrics.SendFailed.Add(1,
+                    new KeyValuePair<string, object?>[] { new("channel", "firebase") });
+                throw;
+            }
+            finally
+            {
+                sw.Stop();
+
+                NotificationMetrics.SendDuration.Record(
+                    sw.Elapsed.TotalSeconds,
+                    new KeyValuePair<string, object?>[] { new("channel", "firebase") });
+            }
         }
     }
 }

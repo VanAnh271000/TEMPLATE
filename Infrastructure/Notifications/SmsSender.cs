@@ -1,6 +1,8 @@
-﻿using Application.DTOs.Configuration;
+﻿using Application.DTOs.Commons;
+using Application.DTOs.Configuration;
 using Application.DTOs.Notification;
 using Application.Interfaces.Services.Notification.Senders;
+using System.Diagnostics;
 using System.Net.Http.Json;
 
 namespace Infrastructure.Notifications
@@ -17,26 +19,51 @@ namespace Infrastructure.Notifications
 
         public async Task SendAsync(SmsNotification message)
         {
-            var payload = new
+            var sw = Stopwatch.StartNew();
+
+            NotificationMetrics.SendTotal.Add(1,
+                new KeyValuePair<string, object?>[]
+                {
+                    new("channel", "sms")
+                });
+
+            try
             {
-                to = message.PhoneNumber,
-                message = message.Message,
-                sender = _smsConfig.SenderId
-            };
+                var payload = new
+                {
+                    to = message.PhoneNumber,
+                    message = message.Message,
+                    sender = _smsConfig.SenderId
+                };
 
-            using var request = new HttpRequestMessage(
-                HttpMethod.Post,
-                _smsConfig.ApiUrl)
+                using var request = new HttpRequestMessage(
+                    HttpMethod.Post,
+                    _smsConfig.ApiUrl)
+                {
+                    Content = JsonContent.Create(payload)
+                };
+                request.Headers.Add(
+                "Authorization",
+                $"Bearer {_smsConfig.ApiKey}");
+
+                var response = await _httpClient.SendAsync(request);
+
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception)
             {
-                Content = JsonContent.Create(payload)
-            };
-            request.Headers.Add(
-            "Authorization",
-            $"Bearer {_smsConfig.ApiKey}");
+                NotificationMetrics.SendFailed.Add(1,
+                    new KeyValuePair<string, object?>[] { new("channel", "sms") });
+                throw;
+            }
+            finally
+            {
+                sw.Stop();
 
-            var response = await _httpClient.SendAsync(request);
-
-            response.EnsureSuccessStatusCode();
+                NotificationMetrics.SendDuration.Record(
+                    sw.Elapsed.TotalSeconds,
+                    new KeyValuePair<string, object?>[] { new("channel", "sms") });
+            }
         }
     }
 }
