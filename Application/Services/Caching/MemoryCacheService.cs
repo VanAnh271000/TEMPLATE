@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Services.Caching;
+﻿using Application.DTOs.Metrics;
+using Application.Interfaces.Services.Caching;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
 
@@ -13,7 +14,17 @@ namespace Application.Services.Caching
             _cache = cache;
         }
 
-        public Task<T?> GetAsync<T>(string key) => Task.FromResult(_cache.Get<T>(key));
+        public Task<T?> GetAsync<T>(string key)
+        {
+            var value = _cache.Get<T>(key);
+
+            if (value == null)
+                CacheMetrics.Miss.Add(1);
+            else
+                CacheMetrics.Hit.Add(1);
+
+            return Task.FromResult(value);
+        }
 
         public Task SetAsync<T>(string key, T value, TimeSpan? expiration = null)
         {
