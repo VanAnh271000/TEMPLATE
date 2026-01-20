@@ -2,14 +2,15 @@
 using Application.DTOs.Commons;
 using Application.DTOs.Identity;
 using Application.Interfaces.Services.Identity;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
-namespace API.Controllers
+namespace API.Controllers.V1
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class AccountController : BaseApiController
     {
         private readonly IAccountService _accountService;
