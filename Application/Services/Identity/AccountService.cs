@@ -85,14 +85,21 @@ namespace Application.Services.Identity
             try
             {
                 var queryHash = parameters.ToSha256Hash();
-                return await _cache.GetOrSetAsync(
+                var data = await _cache.GetOrSetAsync(
                     UserCacheKeys.UserQuery(queryHash),
-                    async() => {
-                        var result = _userQuery.GetList(parameters, new[] { "UserName", "FullName", "Department.Name" });
-                        if (result == null) return ServiceResult<PagedResult<AccountDto>>.NotFound(ErrorMessages.UserNotFound);
-                        return ServiceResult<PagedResult<AccountDto>>.Success(result);
-                    }, 
-                    TimeSpan.FromMinutes(5));
+                    async () =>
+                    {
+                        var result = _userQuery.GetList(
+                            parameters,
+                            new[] { "UserName", "FullName", "Department.Name" });
+
+                        return result; 
+                    },
+                    TimeSpan.FromMinutes(5)
+                );
+
+                if (data == null) return ServiceResult<PagedResult<AccountDto>>.NotFound(ErrorMessages.UserNotFound);
+                return ServiceResult<PagedResult<AccountDto>>.Success(data);
             }
             catch (Exception ex)
             {

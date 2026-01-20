@@ -8,16 +8,21 @@ namespace API.Installers
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            //In-Memory Cache
             services.AddMemoryCache();
-            services.AddScoped<ICacheService, CacheService>();
 
-            //Redis Cache
             var redisConfig = configuration.GetSection("Redis").Get<RedisConfiguration>();
             services.AddSingleton(redisConfig);
-            
+
             services.AddSingleton(new RedisConnection(redisConfig));
-            services.AddScoped<ICacheService, RedisCacheService>();
+
+            if (!string.IsNullOrEmpty(redisConfig.ConnectionString))
+            {
+                services.AddScoped<ICacheService, RedisCacheService>();
+            }
+            else
+            {
+                services.AddScoped<ICacheService, CacheService>();
+            }
         }
     }
 }

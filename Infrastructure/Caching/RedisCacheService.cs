@@ -14,6 +14,7 @@ namespace Infrastructure.Caching
         RedisConfiguration config)
         {
             _redis = redis;
+            _config = config;
             _instance = _config.InstanceName ?? string.Empty;
         }
 
