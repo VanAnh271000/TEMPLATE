@@ -85,6 +85,18 @@ namespace SharedKernel.Extensions
             }
         }
 
+        public static string ToSha256Hash(this string value)
+        {
+            if (value.IsNullOrWhiteSpace())
+                return value;
+            using (var sha256 = SHA256.Create())
+            {
+                var inputBytes = Encoding.ASCII.GetBytes(value);
+                var hashBytes = sha256.ComputeHash(inputBytes);
+                return Convert.ToHexString(hashBytes).ToLower();
+            }
+        }
+
         public static bool IsValidEmail(this string email)
         {
             if (email.IsNullOrWhiteSpace())

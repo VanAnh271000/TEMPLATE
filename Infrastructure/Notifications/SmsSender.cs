@@ -1,5 +1,5 @@
-﻿using Application.DTOs.Commons;
-using Application.DTOs.Configuration;
+﻿using Application.DTOs.Configuration;
+using Application.DTOs.Metrics;
 using Application.DTOs.Notification;
 using Application.Interfaces.Services.Notification.Senders;
 using System.Diagnostics;

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Metrics;
 
-namespace Application.DTOs.Commons
+namespace Application.DTOs.Metrics
 {
     public class AppMetrics
     {

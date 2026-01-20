@@ -8,6 +8,6 @@ namespace Application.Interfaces.Services.Identity
 {
     public interface IAccountService : IGenericService<ApplicationUser, AccountDto, CreateAccountDto, string>
     {
-        ServiceResult<PagedResult<AccountDto>> GetList(CommonQueryParameters parameters);
+        Task<ServiceResult<PagedResult<AccountDto>>> GetListAsync(CommonQueryParameters parameters);
     }
 }

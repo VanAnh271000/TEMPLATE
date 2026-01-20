@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Commons;
+﻿using Application.DTOs.Metrics;
 using Serilog.Context;
 
 namespace API.Middlewares
