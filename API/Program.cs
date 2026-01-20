@@ -1,5 +1,7 @@
 using API.Installers;
 using API.Middlewares;
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using Infrastructure;
 using Serilog;
 
@@ -12,6 +14,22 @@ namespace API {
 
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.InstallServicesInAssembly(builder.Configuration);
+            
+            builder.Services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            });
+
+            builder.Services.AddApiVersioning().AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+
+
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
