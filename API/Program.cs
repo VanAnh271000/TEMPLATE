@@ -1,6 +1,5 @@
 using API.Installers;
 using API.Middlewares;
-using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Infrastructure;
 using Serilog;
@@ -44,6 +43,8 @@ namespace API {
 
 
             app.UseMiddleware<CorrelationIdMiddleware>();
+            app.UseMiddleware<ApiDeprecationMiddleware>();
+
 
             app.MapHealthChecks("/health");
 

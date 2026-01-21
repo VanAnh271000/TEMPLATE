@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning.ApiExplorer;
+using Infrastructure.Versioning;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -20,13 +21,15 @@ namespace API.Installers
         {
             foreach (var description in _provider.ApiVersionDescriptions)
             {
+                var major = description.ApiVersion.MajorVersion ?? 0;
+                var isDeprecated = ApiVersionPolicy.DeprecatedMajorVersions.Contains(major);
                 options.SwaggerDoc(
                     description.GroupName,
                     new OpenApiInfo
                     {
                         Title = "Template API",
                         Version = description.ApiVersion.ToString(),
-                        Description = description.IsDeprecated
+                        Description = isDeprecated
                             ? "This API version has been deprecated."
                             : "API documentation"
                     });
