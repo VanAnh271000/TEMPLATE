@@ -2,7 +2,7 @@
 {
     public class PagedResult<T>
     {
-        public IList<T> Data { get; set; } = new List<T>();
+        public IList<T> Items { get; set; } = new List<T>();
         public int TotalCount { get; set; }
         public int Index { get; set; }
         public int PageSize { get; set; }
@@ -11,12 +11,12 @@
         public bool HasNextPage => Index < TotalPages;
         public PagedResult()
         {
-            Data = new List<T>();
+            Items = new List<T>();
         }
 
         public PagedResult(IEnumerable<T> items, int totalCount, int index, int pageSize)
         {
-            Data = items.ToList();
+            Items = items.ToList();
             TotalCount = totalCount;
             Index = index;
             PageSize = pageSize;

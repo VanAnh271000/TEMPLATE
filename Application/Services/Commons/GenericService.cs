@@ -124,11 +124,11 @@ namespace Application.Services.Commons
             var pagedResult = _repository.GetPaged(parameters.ToGenericQueryParameters(), searchProperties, includes);
             if (pagedResult == null)
                 return ServiceResult<PagedResult<TDto>>.Error(ErrorMessages.ErrorRetrivingEntity);
-            var dtoItems = _mapper.Map<List<TDto>>(pagedResult.Data);
+            var dtoItems = _mapper.Map<List<TDto>>(pagedResult.Items);
 
             var result = new PagedResult<TDto>
             {
-                Data = dtoItems,
+                Items = dtoItems,
                 TotalCount = pagedResult.TotalCount,
                 Index = pagedResult.Index,
                 PageSize = pagedResult.PageSize,
@@ -142,11 +142,11 @@ namespace Application.Services.Commons
             var pagedResult = _repository.GetPaged(parameters, searchProperties, includes);
             if (pagedResult == null)
                 return ServiceResult<PagedResult<TDto>>.Error($"{ErrorMessages.ErrorRetrivingEntity}s");
-            var dtoItems = _mapper.Map<List<TDto>>(pagedResult.Data);
+            var dtoItems = _mapper.Map<List<TDto>>(pagedResult.Items);
 
             var result = new PagedResult<TDto>
             {
-                Data = dtoItems,
+                Items = dtoItems,
                 TotalCount = pagedResult.TotalCount,
                 Index = pagedResult.Index,
                 PageSize = pagedResult.PageSize,
@@ -160,11 +160,11 @@ namespace Application.Services.Commons
             var pagedResult = _repository.GetPaged(predicate, parameters, searchProperties, includes);
             if (pagedResult == null)
                 return ServiceResult<PagedResult<TDto>>.Error(ErrorMessages.ErrorRetrivingEntity);
-            var dtoItems = _mapper.Map<List<TDto>>(pagedResult.Data);
+            var dtoItems = _mapper.Map<List<TDto>>(pagedResult.Items);
 
             var result = new PagedResult<TDto>
             {
-                Data = dtoItems,
+                Items = dtoItems,
                 TotalCount = pagedResult.TotalCount,
                 Index = pagedResult.Index,
                 PageSize = pagedResult.PageSize,

@@ -7,6 +7,8 @@
         public bool IsSuccess => ResultType == ServiceResultType.Success;
 
         public static ServiceResult Success() => new() { ResultType = ServiceResultType.Success };
+        public static ServiceResult Created() => new() { ResultType = ServiceResultType.Created };
+        public static ServiceResult NoContent() => new() { ResultType = ServiceResultType.NoContent };
         public static ServiceResult NotFound(string message) => new() { ResultType = ServiceResultType.NotFound, Message = message };
         public static ServiceResult Error(string message) => new() { ResultType = ServiceResultType.Error, Message = message };
         public static ServiceResult BadRequest(string message) => new() { ResultType = ServiceResultType.BadRequest, Message = message };

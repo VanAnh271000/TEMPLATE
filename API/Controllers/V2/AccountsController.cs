@@ -6,21 +6,21 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers.V1
+namespace API.Controllers.V2
 {
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
-    [ApiVersion("1.0")]
-    public class AccountController : BaseApiController
+    [ApiVersion("2.0")]
+    public class AccountsController : BaseApiController
     {
         private readonly IAccountService _accountService;
-        public AccountController(IAccountService accountService)
+        public AccountsController(IAccountService accountService)
         {
             _accountService = accountService;
         }
 
-        [HttpPost("Create")]
-        //[Authorize(Policy = "WriteAccount")]
+        [HttpPost]
+        [Authorize(Policy = "WriteAccount")]
         public async Task<IActionResult> Create([FromBody] CreateAccountDto dto)
         {
             if (!ModelState.IsValid)
@@ -29,7 +29,7 @@ namespace API.Controllers.V1
             return HandleServiceResult(result);
         }
 
-        [HttpDelete("Delete/{id}")]
+        [HttpDelete("{id}")]
         [Authorize(Policy = "DeleteAccount")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -37,7 +37,7 @@ namespace API.Controllers.V1
             return HandleServiceResult(result);
         }
 
-        [HttpGet("GetList")]
+        [HttpGet]
         [Authorize(Policy = "ReadAccount")]
         public async Task<IActionResult> GetListAsync([FromQuery] CommonQueryParameters parameters)
         {
