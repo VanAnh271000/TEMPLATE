@@ -68,7 +68,7 @@ namespace Application.Services.Commons
                 var createdEntity = _repository.Add(entity);
                 await _unitOfWork.SaveChangesAsync();
                 var resultDto = _mapper.Map<TDto>(createdEntity);
-                return ServiceResult<TDto>.Success(resultDto);
+                return ServiceResult<TDto>.Created(resultDto);
             }
             catch (Exception ex)
             {
@@ -111,7 +111,7 @@ namespace Application.Services.Commons
 
                 _repository.Delete(id);
                 await _unitOfWork.SaveChangesAsync();
-                return ServiceResult.Success();
+                return ServiceResult.NoContent();
             }
             catch (Exception ex)
             {

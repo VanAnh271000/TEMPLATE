@@ -71,7 +71,7 @@ namespace Application.Services.Identity
                 }
                 accountDto.Roles = _mapper.Map<List<RoleDto>>(roles);
                 await _cache.RemoveByPrefixesAsync(UserCacheKeys.UserPrefix, $"user:query:");
-                return ServiceResult<AccountDto>.Success(accountDto);
+                return ServiceResult<AccountDto>.Created(accountDto);
             }
             catch(Exception ex)
             {

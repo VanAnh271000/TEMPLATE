@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.DTOs.Commons;
+using Microsoft.AspNetCore.Mvc;
 using Shared.Results;
 
 namespace API.Controllers.Commons
@@ -11,21 +12,21 @@ namespace API.Controllers.Commons
             return result.ResultType switch
             {
                 ServiceResultType.Success => Ok(
-                    new
+                    new ApiResponse<T>
                     {
                         Data = result.Data,
                         Message = result.Message
                     }
                 ),
                 ServiceResultType.Created => StatusCode(StatusCodes.Status201Created,
-                    new
+                    new ApiResponse<T>
                     {
                         Data = result.Data,
                         Message = result.Message
                     }
                 ),
                 ServiceResultType.NoContent => StatusCode(StatusCodes.Status204NoContent,
-                    new
+                    new ApiResponse<T>
                     {
                         Data = result.Data,
                         Message = result.Message
@@ -55,7 +56,7 @@ namespace API.Controllers.Commons
         }
 
         private object CreateError(string code, string? message)
-        => new
+        => new ErrorResponse
         {
             Code = code,
             Message = message ?? "An error occurred",

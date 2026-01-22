@@ -20,6 +20,8 @@ namespace API.Controllers.V2
         }
 
         [HttpPost]
+        [ProducesResponseType(typeof(ApiResponse<AccountDto>), 201)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
         [Authorize(Policy = "WriteAccount")]
         public async Task<IActionResult> Create([FromBody] CreateAccountDto dto)
         {
@@ -31,6 +33,8 @@ namespace API.Controllers.V2
 
         [HttpDelete("{id}")]
         [Authorize(Policy = "DeleteAccount")]
+        [ProducesResponseType(typeof(ApiResponse<AccountDto>), 204)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _accountService.Delete(id);
