@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.DTOs.Commons;
+using Microsoft.AspNetCore.Mvc;
 using Shared.Results;
 
 namespace API.Controllers.Commons
@@ -10,13 +11,26 @@ namespace API.Controllers.Commons
         {
             return result.ResultType switch
             {
-                ServiceResultType.Success => Ok(result.Data),
-                ServiceResultType.Conflict => Conflict(new { Message = result.Message }),
-                ServiceResultType.NotFound => NotFound(new { Message = result.Message }),
-                ServiceResultType.Error => BadRequest(new { Message = result.Message }),
-                ServiceResultType.ValidationError => UnprocessableEntity(new { Message = result.Message }),
-                ServiceResultType.ServiceUnavailable => StatusCode(StatusCodes.Status503ServiceUnavailable, new { Message = result.Message }),
-                _ => StatusCode(500, new { Message = "Internal server error" }),
+                ServiceResultType.Success => Ok(
+                    new ApiResponse<T>
+                    {
+                        Data = result.Data,
+                        Message = result.Message
+                    }
+                ),
+                ServiceResultType.Created => StatusCode(StatusCodes.Status201Created,
+                    new ApiResponse<T>
+                    {
+                        Data = result.Data,
+                        Message = result.Message
+                    }
+                ),
+                ServiceResultType.Conflict => Conflict(CreateError("CONFLICT", result.Message)),
+                ServiceResultType.NotFound => NotFound(CreateError("NOT_FOUND", result.Message)),
+                ServiceResultType.Error => BadRequest(CreateError("BAD_REQUEST", result.Message)),
+                ServiceResultType.ValidationError => UnprocessableEntity(CreateError("VALIDATION_ERROR", result.Message)),
+                ServiceResultType.ServiceUnavailable => StatusCode(StatusCodes.Status503ServiceUnavailable, CreateError("INTERNAL_ERROR", result.Message)),
+                _ => StatusCode(500, CreateError("INTERNAL_ERROR", result.Message)),
             };
         }
 
@@ -25,12 +39,21 @@ namespace API.Controllers.Commons
             return result.ResultType switch
             {
                 ServiceResultType.Success => Ok(),
-                ServiceResultType.Conflict => Conflict(new { Message = result.Message }),
-                ServiceResultType.NotFound => NotFound(new { Message = result.Message }),
-                ServiceResultType.Error => BadRequest(new { Message = result.Message }),
-                ServiceResultType.ValidationError => UnprocessableEntity(new { Message = result.Message }),
-                _ => StatusCode(500, new { Message = "Internal server error" }),
+                ServiceResultType.Conflict => Conflict(CreateError("CONFLICT", result.Message)),
+                ServiceResultType.NotFound => NotFound(CreateError("NOT_FOUND", result.Message)),
+                ServiceResultType.Error => BadRequest(CreateError("BAD_REQUEST", result.Message)),
+                ServiceResultType.ValidationError => UnprocessableEntity(CreateError("VALIDATION_ERROR", result.Message)),
+                ServiceResultType.ServiceUnavailable => StatusCode(StatusCodes.Status503ServiceUnavailable, CreateError("INTERNAL_ERROR", result.Message)),
+                _ => StatusCode(500, CreateError("INTERNAL_ERROR", result.Message)),
             };
         }
+
+        private object CreateError(string code, string? message)
+        => new ErrorResponse
+        {
+            Code = code,
+            Message = message ?? "An error occurred",
+            TraceId = HttpContext.TraceIdentifier
+        };
     }
 }

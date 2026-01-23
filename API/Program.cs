@@ -1,5 +1,6 @@
 using API.Installers;
 using API.Middlewares;
+using Asp.Versioning.ApiExplorer;
 using Infrastructure;
 using Serilog;
 
@@ -12,7 +13,7 @@ namespace API {
 
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.InstallServicesInAssembly(builder.Configuration);
-
+            
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
             builder.Host.UseSerilog();
@@ -22,14 +23,28 @@ namespace API {
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c =>
+
+                app.UseSwaggerUI(options =>
                 {
-                    c.SwaggerEndpoint("/swagger/v2/swagger.json", "Template");
+                    var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
+                    foreach (var description in provider.ApiVersionDescriptions)
+                    {
+                        options.SwaggerEndpoint(
+                            $"/swagger/{description.GroupName}/swagger.json",
+                            description.GroupName.ToUpperInvariant());
+                    }
+
+                    options.DisplayRequestDuration();
                 });
+
                 app.UseDeveloperExceptionPage();
             }
-            
+
+
             app.UseMiddleware<CorrelationIdMiddleware>();
+            app.UseMiddleware<ApiDeprecationMiddleware>();
+            app.UseMiddleware<GlobalExceptionMiddleware>();
 
             app.MapHealthChecks("/health");
 
@@ -48,6 +63,9 @@ namespace API {
             app.MapControllers();
 
             app.Run();
+
+            
+
         }
     }
 }

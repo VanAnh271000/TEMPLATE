@@ -15,12 +15,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
-		architecture.md = architecture.md
-		caching-performance.md = caching-performance.md
-		logging.md = logging.md
-		monitoring-observability.md = monitoring-observability.md
-		notification-system.md = notification-system.md
-		overview.md = overview.md
+		docs\api-design.md = docs\api-design.md
+		docs\api-versioning.md = docs\api-versioning.md
+		docs\architecture.md = docs\architecture.md
+		docs\caching-performance.md = docs\caching-performance.md
+		docs\logging.md = docs\logging.md
+		docs\monitoring-observability.md = docs\monitoring-observability.md
+		docs\notification-system.md = docs\notification-system.md
+		docs\overview.md = docs\overview.md
 	EndProjectSection
 EndProject
 Global

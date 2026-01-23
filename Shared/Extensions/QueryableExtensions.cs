@@ -125,7 +125,7 @@ namespace Shared.Extensions
 
             return new PagedResult<T>
             {
-                Data = items,
+                Items = items,
                 TotalCount = totalCount,
                 Index = page,
                 PageSize = pageSize,

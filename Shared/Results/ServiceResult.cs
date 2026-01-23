@@ -7,6 +7,8 @@
         public bool IsSuccess => ResultType == ServiceResultType.Success;
 
         public static ServiceResult Success() => new() { ResultType = ServiceResultType.Success };
+        public static ServiceResult Created() => new() { ResultType = ServiceResultType.Created };
+        public static ServiceResult NoContent() => new() { ResultType = ServiceResultType.NoContent };
         public static ServiceResult NotFound(string message) => new() { ResultType = ServiceResultType.NotFound, Message = message };
         public static ServiceResult Error(string message) => new() { ResultType = ServiceResultType.Error, Message = message };
         public static ServiceResult BadRequest(string message) => new() { ResultType = ServiceResultType.BadRequest, Message = message };
@@ -21,6 +23,8 @@
     {
         public T Data { get; private set; }
         public static ServiceResult<T> Success(T data) => new() { ResultType = ServiceResultType.Success, Data = data };
+        public static ServiceResult<T> Created(T data) => new() { ResultType = ServiceResultType.Created, Data = data };
+        public static ServiceResult<T> NoContent(T data) => new() { ResultType = ServiceResultType.NoContent, Data = data };
         public new static ServiceResult<T> NotFound(string message) => new() { ResultType = ServiceResultType.NotFound, Message = message };
         public new static ServiceResult<T> Error(string message) => new() { ResultType = ServiceResultType.Error, Message = message };
         public new static ServiceResult<T> BadRequest(string message) => new() { ResultType = ServiceResultType.BadRequest, Message = message };

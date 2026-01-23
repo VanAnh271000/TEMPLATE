@@ -3,6 +3,8 @@
     public enum ServiceResultType
     {
         Success,
+        Created,
+        NoContent,
         NotFound,
         Error,
         BadRequest,

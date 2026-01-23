@@ -2,24 +2,27 @@
 using Application.DTOs.Commons;
 using Application.DTOs.Identity;
 using Application.Interfaces.Services.Identity;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
-namespace API.Controllers
+namespace API.Controllers.V2
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
-    public class AccountController : BaseApiController
+    [ApiVersion("2.0")]
+    public class AccountsController : BaseApiController
     {
         private readonly IAccountService _accountService;
-        public AccountController(IAccountService accountService)
+        public AccountsController(IAccountService accountService)
         {
             _accountService = accountService;
         }
 
-        [HttpPost("Create")]
-        //[Authorize(Policy = "WriteAccount")]
+        [HttpPost]
+        [ProducesResponseType(typeof(ApiResponse<AccountDto>), 201)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        [Authorize(Policy = "WriteAccount")]
         public async Task<IActionResult> Create([FromBody] CreateAccountDto dto)
         {
             if (!ModelState.IsValid)
@@ -28,15 +31,17 @@ namespace API.Controllers
             return HandleServiceResult(result);
         }
 
-        [HttpDelete("Delete/{id}")]
+        [HttpDelete("{id}")]
         [Authorize(Policy = "DeleteAccount")]
+        [ProducesResponseType(typeof(ApiResponse<AccountDto>), 204)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _accountService.Delete(id);
             return HandleServiceResult(result);
         }
 
-        [HttpGet("GetList")]
+        [HttpGet]
         [Authorize(Policy = "ReadAccount")]
         public async Task<IActionResult> GetListAsync([FromQuery] CommonQueryParameters parameters)
         {

@@ -2,7 +2,6 @@
 using Application.Interfaces.Services.Hangfire;
 using Application.Services.Commons;
 using Application.Services.Identity;
-using Infrastructure.BackgroundJobs.Jobs;
 using Infrastructure.BackgroundJobs.Services;
 using Infrastructure.Context.Queries;
 using Infrastructure.Context.Repositories;
