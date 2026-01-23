@@ -13,4 +13,11 @@
 
         public string? TraceId { get; set; } = string.Empty;
     }
+
+    public sealed class ValidationErrorResponse : ErrorResponse
+    {
+        public IDictionary<string, string[]> Errors { get; init; }
+            = new Dictionary<string, string[]>();
+    }
+
 }
