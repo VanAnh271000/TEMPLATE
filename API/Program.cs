@@ -44,7 +44,7 @@ namespace API {
 
             app.UseMiddleware<CorrelationIdMiddleware>();
             app.UseMiddleware<ApiDeprecationMiddleware>();
-
+            app.UseMiddleware<GlobalExceptionMiddleware>();
 
             app.MapHealthChecks("/health");
 
