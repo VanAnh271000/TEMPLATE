@@ -25,13 +25,6 @@ namespace API.Controllers.Commons
                         Message = result.Message
                     }
                 ),
-                ServiceResultType.NoContent => StatusCode(StatusCodes.Status204NoContent,
-                    new ApiResponse<T>
-                    {
-                        Data = result.Data,
-                        Message = result.Message
-                    }
-                ),
                 ServiceResultType.Conflict => Conflict(CreateError("CONFLICT", result.Message)),
                 ServiceResultType.NotFound => NotFound(CreateError("NOT_FOUND", result.Message)),
                 ServiceResultType.Error => BadRequest(CreateError("BAD_REQUEST", result.Message)),

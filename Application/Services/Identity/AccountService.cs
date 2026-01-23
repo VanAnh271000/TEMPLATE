@@ -9,7 +9,6 @@ using Application.Services.Commons;
 using AutoMapper;
 using Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
-using Serilog;
 using Shared.Constants;
 using Shared.Extensions;
 using Shared.Results;
@@ -42,70 +41,54 @@ namespace Application.Services.Identity
 
         public async override Task<ServiceResult<AccountDto>> CreateAsync(CreateAccountDto createAccountDto)
         {
-            try
+            var user = new ApplicationUser
             {
-                var user = new ApplicationUser
-                {
-                    UserName = createAccountDto.UserName,
-                    Email = createAccountDto.Email,
-                    FullName = createAccountDto.FullName,
-                    CreatedTime = DateTime.UtcNow,
-                    IsActive = true
-                };
-                var result = await _userManager.CreateAsync(user, createAccountDto.Password);
-                if (!result.Succeeded) return ServiceResult<AccountDto>.Error(string.Join(", ", result.Errors.Select(e => e.Description)));
-                var accountDto = _mapper.Map<AccountDto>(user);
+                UserName = createAccountDto.UserName,
+                Email = createAccountDto.Email,
+                FullName = createAccountDto.FullName,
+                CreatedTime = DateTime.UtcNow,
+                IsActive = true
+            };
+            var result = await _userManager.CreateAsync(user, createAccountDto.Password);
+            if (!result.Succeeded) return ServiceResult<AccountDto>.Error(string.Join(", ", result.Errors.Select(e => e.Description)));
+            var accountDto = _mapper.Map<AccountDto>(user);
 
-                var roles = _roleRepository.GetMulti(r => createAccountDto.RoleIds.Contains(r.Id), ["RolePermissions"]).ToList();
-                if (roles != null && roles.Any())
-                {
-                    foreach (var role in roles)
-                    {
-                        _userRoleRepository.Add(new UserRole
-                        {
-                            UserId = user.Id,
-                            RoleId = role.Id
-                        });
-                    }
-                    await _unitOfWork.SaveChangesAsync();
-                }
-                accountDto.Roles = _mapper.Map<List<RoleDto>>(roles);
-                await _cache.RemoveByPrefixesAsync(UserCacheKeys.UserPrefix, $"user:query:");
-                return ServiceResult<AccountDto>.Created(accountDto);
-            }
-            catch(Exception ex)
+            var roles = _roleRepository.GetMulti(r => createAccountDto.RoleIds.Contains(r.Id), ["RolePermissions"]).ToList();
+            if (roles != null && roles.Any())
             {
-                Log.Error(ex, "Error occurred while creating a new user");
-                return ServiceResult<AccountDto>.InternalServerError($"An error occurred while creating the user: {ex.Message}");
+                foreach (var role in roles)
+                {
+                    _userRoleRepository.Add(new UserRole
+                    {
+                        UserId = user.Id,
+                        RoleId = role.Id
+                    });
+                }
+                await _unitOfWork.SaveChangesAsync();
             }
+            accountDto.Roles = _mapper.Map<List<RoleDto>>(roles);
+            await _cache.RemoveByPrefixesAsync(UserCacheKeys.UserPrefix, $"user:query:");
+            return ServiceResult<AccountDto>.Created(accountDto);
         }
 
         public async Task<ServiceResult<PagedResult<AccountDto>>> GetListAsync(CommonQueryParameters parameters)
         {
-            try
-            {
-                var queryHash = parameters.ToSha256Hash();
-                var data = await _cache.GetOrSetAsync(
-                    UserCacheKeys.UserQuery(queryHash),
-                    async () =>
-                    {
-                        var result = _userQuery.GetList(
-                            parameters,
-                            new[] { "UserName", "FullName", "Department.Name" });
+            var queryHash = parameters.ToSha256Hash();
+            var data = await _cache.GetOrSetAsync(
+                UserCacheKeys.UserQuery(queryHash),
+                async () =>
+                {
+                    var result = _userQuery.GetList(
+                        parameters,
+                        new[] { "UserName", "FullName", "Department.Name" });
 
-                        return result; 
-                    },
-                    TimeSpan.FromMinutes(5)
-                );
+                    return result;
+                },
+                TimeSpan.FromMinutes(5)
+            );
 
-                if (data == null) return ServiceResult<PagedResult<AccountDto>>.NotFound(ErrorMessages.UserNotFound);
-                return ServiceResult<PagedResult<AccountDto>>.Success(data);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error occurred while retrieving account list");
-                return ServiceResult<PagedResult<AccountDto>>.InternalServerError($"{ErrorMessages.GetAccountFailed}: {ex.Message}");
-            }
+            if (data == null) return ServiceResult<PagedResult<AccountDto>>.NotFound(ErrorMessages.UserNotFound);
+            return ServiceResult<PagedResult<AccountDto>>.Success(data);
         }
 
     }

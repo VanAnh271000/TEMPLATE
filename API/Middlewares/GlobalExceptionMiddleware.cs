@@ -26,45 +26,49 @@ namespace API.Middlewares
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            context.Response.ContentType = "application/json";
+            var traceId = context.TraceIdentifier;
 
-            var response = exception switch
+            Log.Error(
+                exception,
+                "Unhandled exception occurred. TraceId: {TraceId}",
+                traceId);
+
+            var (statusCode, errorCode, message) = MapException(exception);
+
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = statusCode;
+
+            var response = new ErrorResponse
             {
-                AppNotFoundException => CreateResponse(404, "NOT_FOUND", exception, context),
-                AppConflictException => CreateResponse(409, "CONFLICT", exception, context),
-                AppValidationException vex => CreateValidationResponse(vex, context),
-                _ => CreateResponse(500, "INTERNAL_ERROR", exception, context)
+                Code = errorCode,
+                Message = message,
+                TraceId = traceId
             };
 
-            context.Response.StatusCode = response.StatusCode;
-            await context.Response.WriteAsJsonAsync(response.Body);
+            await context.Response.WriteAsJsonAsync(response);
         }
 
-        private static (int StatusCode, object Body) CreateResponse(
-            int statusCode,
-            string code,
-            Exception ex,
-            HttpContext ctx)
+        private static (int StatusCode, string Code, string Message) MapException(Exception exception)
         {
-            return (statusCode, new ErrorResponse
+            return exception switch
             {
-                Code = code,
-                Message = ex.Message,
-                TraceId = ctx.TraceIdentifier
-            });
-        }
+                TaskCanceledException =>
+                    (StatusCodes.Status408RequestTimeout,
+                     "REQUEST_TIMEOUT",
+                     "The request timed out"),
 
-        private static (int StatusCode, object Body) CreateValidationResponse(AppValidationException ex, HttpContext ctx)
-        {
-            return (422, new ValidationErrorResponse
-            {
-                Code = "VALIDATION_ERROR",
-                Message = ex.Message,
-                Errors = ex.Errors,
-                TraceId = ctx.TraceIdentifier
-            });
+                UnauthorizedAccessException =>
+                    (StatusCodes.Status401Unauthorized,
+                     "UNAUTHORIZED",
+                     "Unauthorized access"),
+
+                _ =>
+                    (StatusCodes.Status500InternalServerError,
+                     "INTERNAL_SERVER_ERROR",
+                     "An unexpected error occurred")
+            };
         }
     }
 

@@ -1,14 +1,12 @@
 ﻿using Application.DTOs.Identity;
 using Application.DTOs.Notification;
 using Application.Interfaces.Commons;
-using Application.Interfaces.Services.Hangfire;
 using Application.Interfaces.Services.Identity;
 using Application.Interfaces.Services.Notification;
 using AutoMapper;
 using Domain.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Serilog;
 using Shared.Constants;
 using Shared.Results;
 
@@ -45,321 +43,226 @@ namespace Application.Services.Identity
 
         public async Task<ServiceResult<AccountDto>> GetCurrentUserAsync(string userName)
         {
-            try
-            {
-                var user = await _userManager.FindByNameAsync(userName);
-                if (user == null) return ServiceResult<AccountDto>.Error(ErrorMessages.UserNotFound);
-                var accountDto = _mapper.Map<AccountDto>(user);
-                return ServiceResult<AccountDto>.Success(accountDto);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in GetCurrentUserAsync");
-                return ServiceResult<AccountDto>.InternalServerError("An error occurred while retrieving the user.");
-            }
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null) return ServiceResult<AccountDto>.Error(ErrorMessages.UserNotFound);
+            var accountDto = _mapper.Map<AccountDto>(user);
+            return ServiceResult<AccountDto>.Success(accountDto);
         }
 
         public async Task<ServiceResult<AccountDto>> RegisterAsync(CreateAccountDto createAccountDto)
         {
-            try
+            var user = new ApplicationUser
             {
-                var user = new ApplicationUser
-                {
-                    UserName = createAccountDto.UserName,
-                    Email = createAccountDto.Email,
-                    FullName = createAccountDto.FullName,
-                    CreatedTime = DateTime.UtcNow,
-                    IsActive = true
-                };
-                var result = await _userManager.CreateAsync(user, createAccountDto.Password);
-                if (!result.Succeeded) return ServiceResult<AccountDto>.Error(string.Join(", ", result.Errors.Select(e => e.Description)));
-                var accountDto = _mapper.Map<AccountDto>(result);
+                UserName = createAccountDto.UserName,
+                Email = createAccountDto.Email,
+                FullName = createAccountDto.FullName,
+                CreatedTime = DateTime.UtcNow,
+                IsActive = true
+            };
+            var result = await _userManager.CreateAsync(user, createAccountDto.Password);
+            if (!result.Succeeded) return ServiceResult<AccountDto>.Error(string.Join(", ", result.Errors.Select(e => e.Description)));
+            var accountDto = _mapper.Map<AccountDto>(result);
 
-                return ServiceResult<AccountDto>.Success(accountDto);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in RegisterAsync");
-                return ServiceResult<AccountDto>.InternalServerError($"An error occurred while creating the user: {ex.Message}");
-            }
+            return ServiceResult<AccountDto>.Success(accountDto);
         }
 
         public async Task<ServiceResult<AuthenticationResult>> LoginAsync(LoginDto loginRequest)
         {
-            try
+            var user = await _userManager.FindByNameAsync(loginRequest.UserName);
+            if (user == null || !user.IsActive)
             {
-                var user = await _userManager.FindByNameAsync(loginRequest.UserName);
-                if (user == null || !user.IsActive)
-                {
-                    return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidCredentials);
-                }
-                var signInResult = await _signInManager.CheckPasswordSignInAsync(user, loginRequest.Password, false);
-                if (!signInResult.Succeeded)
-                {
-                    return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidCredentials);
-                }
-                if (user.TwoFactorEnabled)
-                {
-                    var code = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider);
-                    var sendEmailResult = SendLoginOtpByEmail(user, code);
-                    if (!sendEmailResult.IsSuccess)
-                    {
-                        return ServiceResult<AuthenticationResult>.Error("Failed to resend OTP email.");
-                    }
-                    return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult()
-                    {
-                        UserName = user.UserName,
-                        TwoFactorEnabled = true
-                    });
-                }
-
-                var tokens = await GenerateTokenAsync(user, loginRequest.IpAddress);
-                return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult()
-                {
-                    AccessToken = tokens.Item1,
-                    RefreshToken = tokens.Item2,
-                    UserName = user.UserName
-                });
+                return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidCredentials);
             }
-            catch (Exception ex)
+            var signInResult = await _signInManager.CheckPasswordSignInAsync(user, loginRequest.Password, false);
+            if (!signInResult.Succeeded)
             {
-                Log.Error(ex, "Error in LoginAsync");
-                return ServiceResult<AuthenticationResult>.InternalServerError("An error occurred during login.");
+                return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidCredentials);
             }
-        }
-
-        public async Task<ServiceResult<AuthenticationResult>> Login2FaAsync(LoginOtpDto loginRequest)
-        {
-            try
+            if (user.TwoFactorEnabled)
             {
-                var user = await _userManager.FindByNameAsync(loginRequest.UserName);
-                if (user == null || !user.IsActive) return ServiceResult<AuthenticationResult>.Error(ErrorMessages.UserNotFound);
-                else if (!user.TwoFactorEnabled) return ServiceResult<AuthenticationResult>.Error(ErrorMessages.TwoFactorNotEnabled);
-                var validVertification = await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider, loginRequest.Code);
-                if (!validVertification) return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidOTPCode);
-                
-                var tokens = await GenerateTokenAsync(user, loginRequest.IpAddress);
-                return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult
-                {
-                    AccessToken = tokens.Item1,
-                    RefreshToken = tokens.Item2,
-                });
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in Login2FaAsync");
-                return ServiceResult<AuthenticationResult>.InternalServerError("An error occurred during 2FA login.");
-            }
-        }
-
-        public async Task<ServiceResult<AuthenticationResult>> RefreshTokenAsync(RefreshTokenDto request)
-        {
-            try
-            {
-                var storedRefreshToken = _refreshTokenRepository.GetSingleByCondition(rt => rt.Token == request.RefreshToken
-                                             && rt.IsActive
-                                             && rt.ExpiryDate > DateTime.UtcNow, ["User"]);
-
-                if (storedRefreshToken == null)
-                {
-                    return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidRefreshToken);
-                }
-
-                var user = storedRefreshToken.User;
-                if (user == null || !user.IsActive)
-                {
-                    return ServiceResult<AuthenticationResult>.Error(ErrorMessages.UserNotFound);
-                }
-
-                _refreshTokenRepository.Delete(storedRefreshToken);
-                var tokens = await GenerateTokenAsync(user, request.IpAddress);
-
-                return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult
-                {
-                    AccessToken = tokens.Item1,
-                    RefreshToken = tokens.Item2,
-                });
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in RefreshTokenAsync");
-                return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidRefreshToken);
-            }
-        }
-
-        public async Task<ServiceResult> ChangePasswordAsync(ChangePasswordDto changePassword, string userName)
-        {
-            try
-            {
-                var user = await _userManager.FindByNameAsync(userName);
-                if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
-
-                var isValid = await _userManager.CheckPasswordAsync(user, changePassword.OldPassword);
-                if(!isValid) return ServiceResult.Error(ErrorMessages.InvalidPassword);
-
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var changePasswordResult = await _userManager.ResetPasswordAsync(user, token, changePassword.Password);
-                if (!changePasswordResult.Succeeded)
-                {
-                    foreach (var error in changePasswordResult.Errors)
-                    {
-                        return ServiceResult.Error(error.Description);
-                    }
-                }
-                return ServiceResult.Success();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in ChangePasswordAsync");
-                return ServiceResult.InternalServerError("An error occurred while changing the password.");
-            }
-        }
-
-        public async Task<ServiceResult> ResendLoginOTPAsync(string userName)
-        {
-            try
-            {
-                var user = await _userManager.FindByNameAsync(userName);
-                if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
                 var code = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider);
                 var sendEmailResult = SendLoginOtpByEmail(user, code);
-                if (!sendEmailResult.IsSuccess) return ServiceResult.Error(ErrorMessages.SendEmailFailed);
+                if (!sendEmailResult.IsSuccess)
+                {
+                    return ServiceResult<AuthenticationResult>.Error("Failed to resend OTP email.");
+                }
                 return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult()
                 {
                     UserName = user.UserName,
                     TwoFactorEnabled = true
                 });
             }
-            catch (Exception ex)
+
+            var tokens = await GenerateTokenAsync(user, loginRequest.IpAddress);
+            return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult()
             {
-                Log.Error(ex, "Error in ResendLoginOTPAsync");
-                return ServiceResult.InternalServerError("An error occurred while resending the OTP.");
+                AccessToken = tokens.Item1,
+                RefreshToken = tokens.Item2,
+                UserName = user.UserName
+            });
+        }
+
+        public async Task<ServiceResult<AuthenticationResult>> Login2FaAsync(LoginOtpDto loginRequest)
+        {
+            var user = await _userManager.FindByNameAsync(loginRequest.UserName);
+            if (user == null || !user.IsActive) return ServiceResult<AuthenticationResult>.Error(ErrorMessages.UserNotFound);
+            else if (!user.TwoFactorEnabled) return ServiceResult<AuthenticationResult>.Error(ErrorMessages.TwoFactorNotEnabled);
+            var validVertification = await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider, loginRequest.Code);
+            if (!validVertification) return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidOTPCode);
+
+            var tokens = await GenerateTokenAsync(user, loginRequest.IpAddress);
+            return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult
+            {
+                AccessToken = tokens.Item1,
+                RefreshToken = tokens.Item2,
+            });
+        }
+
+        public async Task<ServiceResult<AuthenticationResult>> RefreshTokenAsync(RefreshTokenDto request)
+        {
+            var storedRefreshToken = _refreshTokenRepository.GetSingleByCondition(rt => rt.Token == request.RefreshToken
+                                             && rt.IsActive
+                                             && rt.ExpiryDate > DateTime.UtcNow, ["User"]);
+
+            if (storedRefreshToken == null)
+            {
+                return ServiceResult<AuthenticationResult>.Error(ErrorMessages.InvalidRefreshToken);
             }
+
+            var user = storedRefreshToken.User;
+            if (user == null || !user.IsActive)
+            {
+                return ServiceResult<AuthenticationResult>.Error(ErrorMessages.UserNotFound);
+            }
+
+            _refreshTokenRepository.Delete(storedRefreshToken);
+            var tokens = await GenerateTokenAsync(user, request.IpAddress);
+
+            return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult
+            {
+                AccessToken = tokens.Item1,
+                RefreshToken = tokens.Item2,
+            });
+        }
+
+        public async Task<ServiceResult> ChangePasswordAsync(ChangePasswordDto changePassword, string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
+
+            var isValid = await _userManager.CheckPasswordAsync(user, changePassword.OldPassword);
+            if (!isValid) return ServiceResult.Error(ErrorMessages.InvalidPassword);
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var changePasswordResult = await _userManager.ResetPasswordAsync(user, token, changePassword.Password);
+            if (!changePasswordResult.Succeeded)
+            {
+                foreach (var error in changePasswordResult.Errors)
+                {
+                    return ServiceResult.Error(error.Description);
+                }
+            }
+            return ServiceResult.Success();
+        }
+
+        public async Task<ServiceResult> ResendLoginOTPAsync(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
+            var code = await _userManager.GenerateTwoFactorTokenAsync(user, TokenOptions.DefaultEmailProvider);
+            var sendEmailResult = SendLoginOtpByEmail(user, code);
+            if (!sendEmailResult.IsSuccess) return ServiceResult.Error(ErrorMessages.SendEmailFailed);
+            return ServiceResult<AuthenticationResult>.Success(new AuthenticationResult()
+            {
+                UserName = user.UserName,
+                TwoFactorEnabled = true
+            });
         }
 
         public async Task<ServiceResult> SendEmailConfirmationLinkAsync(string userName, string email)
         {
-            try
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationLink = $"{_configuration["JWT:ValidAudience"]}/{_configuration["EmailConfiguration:ConfirmEmailPath"]}" +
+                    $"?token={Uri.EscapeDataString(token)}" +
+                    $"&email={Uri.EscapeDataString(email)}";
+            var body = $"<p>Hi {user.FullName}</p>" +
+                    $"<p>Please confirm your email by clicking in the link below.</p>" +
+                    $"<p><a href=\"{confirmationLink}\">Confirm</a></p>" +
+                    $"<p>Thank you.</p>";
+            var message = new NotificationMessage()
             {
-                var user = await _userManager.FindByNameAsync(userName);
-                if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var confirmationLink = $"{_configuration["JWT:ValidAudience"]}/{_configuration["EmailConfiguration:ConfirmEmailPath"]}" +
-                        $"?token={Uri.EscapeDataString(token)}" +
-                        $"&email={Uri.EscapeDataString(email)}";
-                var body = $"<p>Hi {user.FullName}</p>" +
-                        $"<p>Please confirm your email by clicking in the link below.</p>" +
-                        $"<p><a href=\"{confirmationLink}\">Confirm</a></p>" +
-                        $"<p>Thank you.</p>";
-                var message = new NotificationMessage()
-                {
-                    Email = email,
-                    Title = "[EMAIL CONFIRMATION LINK]",
-                    Content = body
-                };
-                _notificationService.SendAsync(message);
-                return ServiceResult.Success();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in SendEmailConfirmationLinkAsync");
-                return ServiceResult.InternalServerError("An error occurred while sending the email confirmation link.");
-            }
+                Email = email,
+                Title = "[EMAIL CONFIRMATION LINK]",
+                Content = body
+            };
+            _notificationService.SendAsync(message);
+            return ServiceResult.Success();
         }
 
         public async Task<ServiceResult> ConfirmEmailAsync(string userName, EmailToken emailToken)
         {
-            try
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
+            var result = await _userManager.ConfirmEmailAsync(user, emailToken.Token);
+            if (result.Succeeded)
             {
-                var user = await _userManager.FindByNameAsync(userName);
-                if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
-                var result = await _userManager.ConfirmEmailAsync(user, emailToken.Token);
-                if (result.Succeeded)
-                {
-                    user.Email = emailToken.Email;
-                    await _userManager.UpdateAsync(user);
-                    return ServiceResult.Success();
-                }
-                else
-                    return ServiceResult.Error(ErrorMessages.InvalidToken);
+                user.Email = emailToken.Email;
+                await _userManager.UpdateAsync(user);
+                return ServiceResult.Success();
             }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in ConfirmEmailAsync");
-                return ServiceResult.InternalServerError("An error occurred while confirming the email.");
-            }
+            else
+                return ServiceResult.Error(ErrorMessages.InvalidToken);
         }
 
         public async Task<ServiceResult> UpdateProfileAsync(string userName, UpdateProfileDto profile)
         {
-            try
-            {
-                var user = await _userManager.FindByIdAsync(userName);
-                if(user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
-                if(profile.Email != user.Email && user.EmailConfirmed) user.EmailConfirmed = false;
-                _mapper.Map(profile, user);
-                var result = await _userManager.UpdateAsync(user);
-                if (result.Succeeded)
-                    return ServiceResult<string>.Success("Profile updated successfully");
-                return ServiceResult<string>.Error(ErrorMessages.UpdateProfileFailed);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in UpdateProfileAsync");
-                return ServiceResult<string>.InternalServerError($"{ErrorMessages.UpdateProfileFailed}: {ex.Message}");
-            }
+            var user = await _userManager.FindByIdAsync(userName);
+            if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
+            if (profile.Email != user.Email && user.EmailConfirmed) user.EmailConfirmed = false;
+            _mapper.Map(profile, user);
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+                return ServiceResult<string>.Success("Profile updated successfully");
+            return ServiceResult<string>.Error(ErrorMessages.UpdateProfileFailed);
         }
 
         public async Task<ServiceResult> ForgotPasswordByEmailAsync(string email) 
-        {             
-            try
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var resetLink = $"{_configuration["JWT:ValidAudience"]}/{_configuration["EmailConfiguration:ResetPasswordPath"]}" +
+                    $"?token={Uri.EscapeDataString(token)}" +
+                    $"&email={Uri.EscapeDataString(email)}";
+            var body = $"<p>Hi {user.FullName}</p>" +
+                    $"<p>Please reset your password by clicking in the link below.</p>" +
+                    $"<p><a href=\"{resetLink}\">Reset Password</a></p>" +
+                    $"<p>Thank you.</p>";
+            var message = new NotificationMessage()
             {
-                var user = await _userManager.FindByEmailAsync(email);
-                if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var resetLink = $"{_configuration["JWT:ValidAudience"]}/{_configuration["EmailConfiguration:ResetPasswordPath"]}" +
-                        $"?token={Uri.EscapeDataString(token)}" +
-                        $"&email={Uri.EscapeDataString(email)}";
-                var body = $"<p>Hi {user.FullName}</p>" +
-                        $"<p>Please reset your password by clicking in the link below.</p>" +
-                        $"<p><a href=\"{resetLink}\">Reset Password</a></p>" +
-                        $"<p>Thank you.</p>";
-                var message = new NotificationMessage() { 
-                    Email = email,
-                    Title = "[PASSWORD RESET LINK]",
-                    Content = body
-                };
-                _notificationService.SendAsync(message);
-                return ServiceResult.Success();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in ForgotPasswordByEmailAsync");
-                return ServiceResult.InternalServerError("An error occurred while sending the password reset link.");
-            }
+                Email = email,
+                Title = "[PASSWORD RESET LINK]",
+                Content = body
+            };
+            _notificationService.SendAsync(message);
+            return ServiceResult.Success();
         }
 
         public async Task<ServiceResult> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
         {
-            try
+            var user = await _userManager.FindByNameAsync(resetPasswordDto.UserName);
+            if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
+            var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.Password);
+            if (!result.Succeeded)
             {
-                var user = await _userManager.FindByNameAsync(resetPasswordDto.UserName);
-                if (user == null) return ServiceResult.Error(ErrorMessages.UserNotFound);
-                var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.Password);
-                if (!result.Succeeded) 
+                foreach (var error in result.Errors)
                 {
-                    foreach (var error in result.Errors)
-                    {
-                        return ServiceResult.Error(error.Description);
-                    }
+                    return ServiceResult.Error(error.Description);
                 }
-                return ServiceResult.Success();
             }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error in ResetPasswordAsync");
-                return ServiceResult.InternalServerError("An error occurred while resetting the password.");
-            }
+            return ServiceResult.Success();
         }
         
         
