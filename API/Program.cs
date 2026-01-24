@@ -69,6 +69,8 @@ namespace API {
                 await next();
             });
 
+            app.UseRateLimiter();
+
             app.MapControllers();
 
             app.Run();

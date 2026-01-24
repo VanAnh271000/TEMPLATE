@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -57,6 +58,14 @@ namespace API.Installers
                 });
             });
 
+            services.AddRateLimiter(options =>
+            {
+                options.AddFixedWindowLimiter("default", limiter =>
+                {
+                    limiter.PermitLimit = 100;
+                    limiter.Window = TimeSpan.FromMinutes(1);
+                });
+            });
 
             services.AddCors(c =>
             {
