@@ -19,11 +19,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\api-versioning.md = docs\api-versioning.md
 		docs\architecture.md = docs\architecture.md
 		docs\caching-performance.md = docs\caching-performance.md
+		docs\configuration.md = docs\configuration.md
 		docs\logging.md = docs\logging.md
 		docs\monitoring-observability.md = docs\monitoring-observability.md
 		docs\notification-system.md = docs\notification-system.md
 		docs\overview.md = docs\overview.md
+		docs\security.md = docs\security.md
+		docs\unit-testing.md = docs\unit-testing.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.UnitTest", "UnitTest\Application.UnitTest.csproj", "{3E753538-F24B-4DB0-9F87-E6A6C6A702E2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{664D4AEC-287E-40A6-A032-AF6E05D4BE4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,9 +58,16 @@ Global
 		{22439681-D793-4FAE-8EF5-7500C7AA963F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22439681-D793-4FAE-8EF5-7500C7AA963F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22439681-D793-4FAE-8EF5-7500C7AA963F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E753538-F24B-4DB0-9F87-E6A6C6A702E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E753538-F24B-4DB0-9F87-E6A6C6A702E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E753538-F24B-4DB0-9F87-E6A6C6A702E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E753538-F24B-4DB0-9F87-E6A6C6A702E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3E753538-F24B-4DB0-9F87-E6A6C6A702E2} = {664D4AEC-287E-40A6-A032-AF6E05D4BE4E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7065B1FA-7D21-42E6-AC77-5E64A30D3F5A}

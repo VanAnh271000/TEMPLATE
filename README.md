@@ -1,4 +1,4 @@
-# TEMPLATE
+﻿# TEMPLATE
 A production-ready .NET Web API template with authentication, authorization, background jobs, and common best practices.
 
 # Backend Template (.NET)
