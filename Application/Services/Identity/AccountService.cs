@@ -41,6 +41,9 @@ namespace Application.Services.Identity
 
         public async override Task<ServiceResult<AccountDto>> CreateAsync(CreateAccountDto createAccountDto)
         {
+            var validationResult = ValidateDto(createAccountDto);
+            if (validationResult != null) 
+                return ServiceResult<AccountDto>.ValidationError(validationResult.Message);
             var user = new ApplicationUser
             {
                 UserName = createAccountDto.UserName,
@@ -91,5 +94,9 @@ namespace Application.Services.Identity
             return ServiceResult<PagedResult<AccountDto>>.Success(data);
         }
 
+        private ServiceResult ValidateDto(CreateAccountDto dto)
+        {
+            return ServiceResult.Success();
+        }
     }
 }

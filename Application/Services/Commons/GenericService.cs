@@ -58,12 +58,15 @@ namespace Application.Services.Commons
         {
             try
             {
+                // Validate DTO
+                var dtoValidationResult = ValidateCreatedDto(dto);
+                if (!dtoValidationResult.IsSuccess)
+                    return ServiceResult<TDto>.ValidationError(dtoValidationResult.Message);
                 var entity = _mapper.Map<TEntity>(dto);
-
                 // Validate business rules
                 var validationResult = ValidateEntity(entity);
                 if (!validationResult.IsSuccess)
-                    return ServiceResult<TDto>.Error(validationResult.Message);
+                    return ServiceResult<TDto>.ValidationError(validationResult.Message);
 
                 var createdEntity = _repository.Add(entity);
                 await _unitOfWork.SaveChangesAsync();
@@ -80,6 +83,9 @@ namespace Application.Services.Commons
         {
             try
             {
+                var dtoValidationResult = ValidateCreatedDto(dto);
+                if (!dtoValidationResult.IsSuccess)
+                    return ServiceResult<TDto>.ValidationError(dtoValidationResult.Message);
                 var existingEntity = _repository.GetSingleById(id);
                 if (existingEntity == null)
                     return ServiceResult<TDto>.NotFound($"Entity with id {id} not found");
@@ -88,7 +94,7 @@ namespace Application.Services.Commons
 
                 var validationResult = ValidateEntity(existingEntity);
                 if (!validationResult.IsSuccess)
-                    return ServiceResult<TDto>.Error(validationResult.Message);
+                    return ServiceResult<TDto>.ValidationError(validationResult.Message);
 
                 _repository.Update(existingEntity);
                 await _unitOfWork.SaveChangesAsync();
@@ -173,6 +179,10 @@ namespace Application.Services.Commons
             return ServiceResult<PagedResult<TDto>>.Success(result);
         }
 
+        protected virtual ServiceResult ValidateCreatedDto(TCreateDto createDto)
+        {
+            return ServiceResult.Success();
+        }
         protected virtual ServiceResult ValidateEntity(TEntity entity)
         {
             // Override this method in derived classes for specific validation
