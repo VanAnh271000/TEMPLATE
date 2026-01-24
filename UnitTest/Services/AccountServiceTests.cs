@@ -174,7 +174,7 @@ namespace Application.UnitTest.Services
 
 
         [Fact]
-        public async Task GetListAsync_ReturnsSuccess()
+        public async Task GetListAsync_Should_ReturnsSuccess()
         {
             // Arrange
             var parameters = new CommonQueryParameters();
