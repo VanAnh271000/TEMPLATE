@@ -23,7 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\monitoring-observability.md = docs\monitoring-observability.md
 		docs\notification-system.md = docs\notification-system.md
 		docs\overview.md = docs\overview.md
-		unit-testing.md = unit-testing.md
+		security.md = security.md
 		docs\unit-testing.md = docs\unit-testing.md
 	EndProjectSection
 EndProject
