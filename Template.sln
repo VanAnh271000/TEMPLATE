@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\monitoring-observability.md = docs\monitoring-observability.md
 		docs\notification-system.md = docs\notification-system.md
 		docs\overview.md = docs\overview.md
+		unit-testing.md = unit-testing.md
+		docs\unit-testing.md = docs\unit-testing.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.UnitTest", "UnitTest\Application.UnitTest.csproj", "{3E753538-F24B-4DB0-9F87-E6A6C6A702E2}"
