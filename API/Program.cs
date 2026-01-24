@@ -49,7 +49,8 @@ namespace API {
             app.MapHealthChecks("/health");
 
             app.MapPrometheusScrapingEndpoint().AllowAnonymous();
-
+            
+            
             app.UseSecuredHangfireDashboard();
 
             app.UseHttpsRedirection();
@@ -59,6 +60,14 @@ namespace API {
             app.UseAuthorization();
 
             app.UseSecuredHangfireDashboard();
+
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+                context.Response.Headers.Add("X-Frame-Options", "DENY");
+                context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+                await next();
+            });
 
             app.MapControllers();
 
