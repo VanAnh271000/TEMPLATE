@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\api-versioning.md = docs\api-versioning.md
 		docs\architecture.md = docs\architecture.md
 		docs\caching-performance.md = docs\caching-performance.md
+		docs\configuration.md = docs\configuration.md
 		docs\logging.md = docs\logging.md
 		docs\monitoring-observability.md = docs\monitoring-observability.md
 		docs\notification-system.md = docs\notification-system.md
