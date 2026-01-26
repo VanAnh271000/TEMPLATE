@@ -22,15 +22,17 @@ A production-ready .NET Web API template with authentication, authorization, bac
 └── UnitTest # Unit tests  
 ## Documentation
 
-- `architecture.md` – Architecture overview
-- `api-design.md` – API design conventions
-- `api-versioning.md` – API versioning strategy
-- `monitoring.md` – Monitoring & observability
-- `notification.md` – Notification system
-- `caching.md` – Caching & performance
-- `security.md` – Security best practices
-- `testing.md` – Unit testing guide
-- `ci-cd.md` – CI/CD pipeline
+- [Architecture overview](docs/architecture.md)
+- [API design conventions](docs/api-design.md)
+- [API versioning strategy](docs/api-versioning.md)
+- [Logging](docs/logging.md)
+- [Monitoring & observability](docs/monitoring-observability.md)
+- [Notification system](docs/notification-system.md)
+- [Caching & performance](docs/caching-performance.md)
+- [Security](docs/security.md)
+- [Unit testing guide](docs/unit-testing.md)
+- [Configuration](docs/configuration.md)
+- [CI/CD pipeline](docs/ci-cd.md)
 
 ## Getting Started
 
