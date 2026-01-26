@@ -9,7 +9,7 @@ COPY Domain/Domain.csproj Domain/
 COPY Infrastructure/Infrastructure.csproj Infrastructure/
 COPY Shared/Shared.csproj Shared/
 
-RUN dotnet restore Template.sln
+RUN dotnet restore API/API.csproj
 
 COPY . .
 RUN dotnet publish API/API.csproj -c Release -o /app/publish
