@@ -42,7 +42,7 @@ namespace Application.Services.Identity
         public async override Task<ServiceResult<AccountDto>> CreateAsync(CreateAccountDto createAccountDto)
         {
             var validationResult = ValidateDto(createAccountDto);
-            if (validationResult != null) 
+            if (!validationResult.IsSuccess) 
                 return ServiceResult<AccountDto>.ValidationError(validationResult.Message);
             var user = new ApplicationUser
             {
@@ -96,7 +96,11 @@ namespace Application.Services.Identity
 
         private ServiceResult ValidateDto(CreateAccountDto dto)
         {
+            if (dto == null || dto.UserName.IsNullOrEmpty() || dto.Password.IsNullOrEmpty())
+                return ServiceResult.ValidationError("Dữ liệu không hợp lệ");
+
             return ServiceResult.Success();
         }
+
     }
 }
