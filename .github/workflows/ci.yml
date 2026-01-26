@@ -1,29 +1,72 @@
-name: CI Pipeline
+name: CI/CD Pipeline (.NET 9 + Docker)
 
 on:
   push:
-    branches: [ "master", "develop" ]
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ "master", "develop" ]
+    branches: [ "main", "develop" ]
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  SOLUTION_FILE: Template.sln
+  TEST_PROJECT_PATH: UnitTest
+  IMAGE_NAME: template-api
 
 jobs:
   build-test:
+    name: Build & Test
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout source
-      uses: actions/checkout@v4
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: Restore
-      run: dotnet restore
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION_FILE }}
 
-    - name: Build
-      run: dotnet build --no-restore
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION_FILE }} -c Release --no-restore
 
-    - name: Run Unit Tests
-      run: dotnet test --no-build --verbosity normal
+      - name: Run Unit Tests
+        run: |
+          dotnet test ${{ env.TEST_PROJECT_PATH }} \
+            -c Release \
+            --no-build \
+            --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: "**/*.trx"
+
+  docker:
+    name: Docker Build & Push
+    needs: build-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Login DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest

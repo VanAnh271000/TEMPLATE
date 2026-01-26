@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\api-versioning.md = docs\api-versioning.md
 		docs\architecture.md = docs\architecture.md
 		docs\caching-performance.md = docs\caching-performance.md
+		ci-cd.md = ci-cd.md
 		docs\configuration.md = docs\configuration.md
 		docs\logging.md = docs\logging.md
 		docs\monitoring-observability.md = docs\monitoring-observability.md
@@ -28,12 +29,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\unit-testing.md = docs\unit-testing.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.UnitTest", "UnitTest\Application.UnitTest.csproj", "{3E753538-F24B-4DB0-9F87-E6A6C6A702E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{3E753538-F24B-4DB0-9F87-E6A6C6A702E2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{664D4AEC-287E-40A6-A032-AF6E05D4BE4E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
+		.env = .env
 		.github\workflows\ci.yml = .github\workflows\ci.yml
 		Dockerfile = Dockerfile
 	EndProjectSection
