@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Moq;
 using Shared.Results;
 using System.Linq.Expressions;
+using UnitTest.Helper;
 
 namespace Application.UnitTest.Services
 {
@@ -25,6 +26,7 @@ namespace Application.UnitTest.Services
         private readonly Mock<UserManager<ApplicationUser>> _userManager;
         private readonly Mock<ICacheService> _cacheService;
         private readonly AccountService _service;
+        private AccountHelper _helper = new AccountHelper();
 
         public AccountServiceTests()
         {
@@ -57,17 +59,34 @@ namespace Application.UnitTest.Services
             );
         }
 
+
+        [Fact]
+        public async Task CreateAsync_InvalidDto_ReturnsValidationError()
+        {
+            // Arrange
+            var dto = new CreateAccountDto(); // thiếu dữ liệu
+            
+            // Act
+            var result = await _service.CreateAsync(dto);
+
+            // Assert
+            result.ResultType.Should().Be(ServiceResultType.ValidationError);
+
+            _userManager.Verify(
+                x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()),
+                Times.Never);
+
+            _unitOfWork.Verify(
+                x => x.SaveChangesAsync(It.IsAny<CancellationToken>()),
+                Times.Never);
+        }
+
+
         [Fact]
         public async Task CreateAsync_Should_Return_Error_When_UserManager_Fails()
         {
             // Arrange
-            var dto = new CreateAccountDto
-            {
-                UserName = "test",
-                Email = "test@test.com",
-                Password = "123",
-                RoleIds = new List<string>()
-            };
+            var dto = _helper.ValidCreateAccountDto();
 
             _userManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), dto.Password))
                 .ReturnsAsync(IdentityResult.Failed(
